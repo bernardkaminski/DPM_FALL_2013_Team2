@@ -25,6 +25,10 @@ public class Navigation {
 			//Code for navigating straight to green/red zone
 		}
 		else{
+			robo.startLightPollers();
+			
+			//while travelling turn on light sensors
+			//Store when light sensor picks up 
 				//travel to (x,y) coordinate passed
 		}		
 	}
