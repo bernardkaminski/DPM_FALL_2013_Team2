@@ -14,7 +14,7 @@ public class LightPoller implements TimerListener
         private Object lock;
         
         //all constants go here, they are denoted with the final keyword convention is to use all caps with underscores
-        private final int PERIOD = 20;//period of filter. timout out will be called every this many milliseconds
+        private final int PERIOD = 20;//period of filter. timeout out will be called every this many milliseconds
         private final double FILTER_CONSTANT=0;
 
         //constructor
