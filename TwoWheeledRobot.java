@@ -164,14 +164,28 @@ public class TwoWheeledRobot {
         *All sensor related methods are below
         */
         
-        public void startLightPollers(){
-        	leftWheelLP.startLightPoller();
+        public void startRightLP(){
         	rightWheelLP.startLightPoller();
         	
         }
-        public void stopLightPollers(){
-        	leftWheelLP.stopLightPoller();
-        	rightWheelLP.stopLightPoller();
+        public void startLeftLP(){
+        	leftWheelLP.startLightPoller();
+        	
         }
+        public void stopRightLP(){
+        	rightWheelLP.stopLightPoller();
+        	
+        }
+        public void stopLeftLP(){
+        	leftWheelLP.stopLightPoller();
+        	
+        }
+        public int getLeftLightValue(){
+        	return leftWheelLP.returnLightValue();
+        }
+        public int getRightLightValue(){
+        	return rightWheelLP.returnLightValue();
+        }
+        
 
 }
