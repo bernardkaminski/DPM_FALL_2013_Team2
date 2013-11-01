@@ -11,6 +11,28 @@ public class Navigation {
 	//Constants
 	private final double TURNTO_THRESHOLD=1.0;
 	private final double GRIDLINE_LIGHTVALUE_THRESHOLD=20; //When light sensor returns value less than this threshold a line has been detected
+	private final int CLOSE=5;
+	private final int SLOW=50;
+	private final int STANDARD=200;
+	private final int FAST=400;
+	private enum Heading
+	{
+		NORTH(0),
+		SOUTH(180),
+		EAST(90),
+		WEST(270);
+		
+		private int value;
+		
+		private Heading(int value)
+		{
+			this.value=value;
+		}
+		public int getAngle()
+		{
+			return value;
+		}
+	}
 	private final double NORTH=0;
 	private final double SOUTH=180;
 	private final double WEST=270;
@@ -45,7 +67,10 @@ public class Navigation {
 	            if(Math.abs(dX)<TRAVELTO_GOAL_THRESHOLD && Math.abs(dY)<TRAVELTO_GOAL_THRESHOLD){
 	                break;
 	            }
-	             
+	            
+	            
+	            
+	            //********************************************************************
 	            //Calculate goal theta (desired heading)
 	            double goalTheta=Math.atan2(dX,dY)*(180/Math.PI);
 	             
@@ -64,6 +89,10 @@ public class Navigation {
 	            if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD){
 	                turnTo(goalTheta,false);
 	            }
+	            
+	            //***************************************this theta ^ correction should be an outside method
+	            
+	            
 	            //Robot is pointed in the right direction, move forward
 	            robo.goForward(); 
 			
@@ -79,7 +108,7 @@ public class Navigation {
 				boolean travellingWest=false;
 				boolean detectionComplete=false;
 				
-				
+				//*************************************************i like the west,north,south,est keywords**********************
 				if(odo.getAng() < WEST + GRIDLINE_ANGLE_THRESHOLD && odo.getAng() > WEST - GRIDLINE_ANGLE_THRESHOLD){
 					//If robot is heading west (within threshold)
 					//Use light sensors to update X coordinate as robot travels
@@ -123,6 +152,11 @@ public class Navigation {
 				double dXdetectionPoints=Math.abs(leftWheelLineDetectCoords[0]-rightWheelLineDetectCoords[0]);
 				double dYdetectionPoints=Math.abs(leftWheelLineDetectCoords[1]-rightWheelLineDetectCoords[1]);
 				double dT=Math.atan2(dXdetectionPoints, dYdetectionPoints);
+				
+				
+				
+				//************* these four cases should be put into one method that takes either north,west,south or east
+				
 				
 				//North travelling correction
 				if(travellingNorth && detectionComplete){
@@ -192,16 +226,81 @@ public class Navigation {
 		}		
 	}
 	
-	//Turn to method
+	
+	private void travelingCorrection()
+	{
+		
+	}
+	
+	//calculate the destination angle of the point 
+	public double calDestinationAngle(double xDest, double yDest)
+	{
+		double odomAngle = odo.getAng();//current position
+		double dAngle = 0 ;//angle to get to
+		double x = odo.getX();
+		double y = odo.getY();
+		double changeY = yDest-y;
+		double changeX = xDest-x;
+		if(changeX==0)
+		{
+			if(changeY>0)
+			{
+				dAngle=0;
+			}
+			else
+			{
+				dAngle=Math.PI;
+			}
+		}
+		else
+		{
+			if(changeY==0)
+			{
+				if(changeX>0)
+				{
+					dAngle=(Math.PI/2);
+				}
+				else
+				{
+					dAngle=(3*Math.PI/2);
+				}
+			}
+			else
+			{
+				dAngle = Math.atan(( changeY/changeX));//math.atan returns radians
+				if((changeX>0 && changeY>0)||(changeX>0 && changeY<0))
+				{
+					dAngle = (Math.PI/2) - dAngle;
+				}
+				if((changeX<0 && changeY<0)||(changeX<0 && changeY>0))
+				{
+					dAngle =(3*Math.PI/2)-dAngle;
+				}
+				
+				
+			}
+		}
+		
+		return Math.toDegrees(dAngle)-odomAngle;
+	}
+	
+	
+	//Turn to method  // not sure why you need to pass a boolean here 
 	public void turnTo(double angle, boolean stop) { 
         
         double error = angle - odo.getAng(); 
-    
+        robo.setRotationSpeed(STANDARD);
         while (Math.abs(error) > TURNTO_THRESHOLD) { 
                
     
             error = angle - odo.getAng(); 
-    
+            
+            //if close reduce speed 
+            if(error <= CLOSE)
+            {
+            	robo.setRotationSpeed(SLOW);
+            }
+            
             if (error < -180.0) { //rotate clockwise at speed defined in Two Wheeled Robot
                 robo.rotateClockwise();
             } else if (error < 0.0) { //rotate counter clockwise at speed defined in Two Wheeled Robot
@@ -212,7 +311,7 @@ public class Navigation {
                 robo.rotateClockwise();
             } 
         } 
-    
+        robo.setRotationSpeed(STANDARD);
         if (stop) { 
             robo.stopMotors();} 
            
