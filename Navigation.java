@@ -1,3 +1,7 @@
+import javax.xml.stream.events.Attribute;
+
+import lejos.nxt.comm.RConsole;
+
 
 public class Navigation {
 	//Properties of navigation
@@ -51,47 +55,31 @@ public class Navigation {
 	//Travel To Method
 	
 	public void travelTo(boolean hasBlock, double x, double y){
-		
+		boolean atPosition = false;
 		if(hasBlock){
 			//Special code for navigating straight to green/red zone
 			}
 		
 		else{			
 			//Travel to given coordinate while using light sensors to update position
-			while(true){
+			while(!atPosition)
+			{
 				//Calculate x and y differences
 	            double dX=x-odo.getX();
 	            double dY=y-odo.getY();
 	             
 	            //Stop if reached goal
-	            if(Math.abs(dX)<TRAVELTO_GOAL_THRESHOLD && Math.abs(dY)<TRAVELTO_GOAL_THRESHOLD){
-	                break;
+	            if(Math.abs(dX)<TRAVELTO_GOAL_THRESHOLD && Math.abs(dY)<TRAVELTO_GOAL_THRESHOLD)
+	            {
+	                atPosition=true;
 	            }
 	            
-	            
-	            
-	            //********************************************************************
 	            //Calculate goal theta (desired heading)
 	            double goalTheta=Math.atan2(dX,dY)*(180/Math.PI);
-	             
 	            if (goalTheta<0){//Make sure theta is always positive
 	                goalTheta+=360;
 	            }
-	            //Heading correction
-	            double thetaCorrection=Math.abs(goalTheta-odo.getAng());
-	             
-	            //handle exceptions over 0-360 line 
-	            if(thetaCorrection>180){ 
-	                thetaCorrection-=360; 
-	            } 
-	             
-	            //Correct theta while moving between gridlines only if error is > than threshold
-	            if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD){
-	                turnTo(goalTheta,false);
-	            }
-	            
-	            //***************************************this theta ^ correction should be an outside method
-	            
+	            travelingThetaUpdater(goalTheta);
 	            
 	            //Robot is pointed in the right direction, move forward
 	            robo.goForward(); 
@@ -148,7 +136,7 @@ public class Navigation {
 				if(detectionCount==2){
 					detectionComplete=true;
 				}
-				//Corrections
+				//Corrections connot miss a line 
 				double dXdetectionPoints=Math.abs(leftWheelLineDetectCoords[0]-rightWheelLineDetectCoords[0]);
 				double dYdetectionPoints=Math.abs(leftWheelLineDetectCoords[1]-rightWheelLineDetectCoords[1]);
 				double dT=Math.atan2(dXdetectionPoints, dYdetectionPoints);
@@ -226,10 +214,33 @@ public class Navigation {
 		}		
 	}
 	
+	public boolean middleLine()
+	{
+		//light 
+		/*if(Currentlight-Lastlight>(LIGHT_DIFFERENCE_CONSTANT)&& light<GRIDLINE_LIGHTVALUE_THRESHOLD)
+		{
+		
+		}
+		return false;*/
+		return false;
+	}
 	
-	private void travelingCorrection()
+	
+	private void travelingThetaUpdater(double goalTheta)
 	{
 		
+        //Heading correction
+        double thetaCorrection=Math.abs(goalTheta-odo.getAng());
+         
+        //handle exceptions over 0-360 line 
+        if(thetaCorrection>180){ 
+            thetaCorrection-=360; 
+        } 
+         
+        //Correct theta while moving between gridlines only if error is > than threshold
+        if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD){
+            turnTo(goalTheta,false);
+        }
 	}
 	
 	//calculate the destination angle of the point 
@@ -327,6 +338,21 @@ public class Navigation {
 		
 	}
 	
-	
+	//use pythogorem to know if the robot has travel the set distance
+	public void travelSetDistanceStraight(double d)
+		{
+			double startingX = odo.getX();
+			double startingY = odo.getY();
+			robo.setForwardSpeed(STANDARD);
+			while ((Math.pow(odo.getX()-startingX, 2) + Math.pow(odo.getY()-startingY, 2)) < Math.pow(d, 2))
+			{
+				RConsole.println(Integer.toString(robo.getLeftLightValue())+" Left");
+				RConsole.println(Integer.toString(robo.getRightLightValue())+" Right");
+				
+				robo.goForward();
+			}
+			robo.stopMotors();
+		}
+		
 
 }
