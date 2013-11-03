@@ -1,33 +1,43 @@
 import lejos.nxt.ColorSensor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.Sound;
-
-//only here because odometer uses it 
+/**
+ * The class that has all the hardware necessary, it controls the three motors and the four sensors.
+ * @author Bernie
+ * @version 1.0
+ * @see UltrasonicPoller,LightPoller,UltrasonicScanner,NXTRegulatedMotor
+ */
+ 
 public class TwoWheeledRobot {
 	
-        public static final double DEFAULT_LEFT_RADIUS = 2.1;
-        public static final double DEFAULT_RIGHT_RADIUS = 2.1;
-        public static final double DEFAULT_WIDTH = 15.1;
+		public static final double DEFAULT_LEFT_RADIUS = 2.1;
+		public static final double DEFAULT_RIGHT_RADIUS = 2.1;
+		public static final double DEFAULT_WIDTH = 15.1;
         private NXTRegulatedMotor leftMotor, rightMotor, clawMotor;
-        private UltrasonicScanner USSTop;
-        private UltrasonicScanner USSBottom;
-        private UltrasonicPoller USPTop;
-        private UltrasonicPoller USPBottom;
-        private LightPoller leftWheelLP;
-        private LightPoller rightWheelLP;
-        
-        
-        //
-        
+        private UltrasonicScanner USSBottom,USSTop;
+        private UltrasonicPoller USPBottom,USPTop;
+        private LightPoller rightWheelLP,leftWheelLP;
         private double leftRadius, rightRadius, width;
         private int forwardSpeed, rotationSpeed;
         
         /*
          * *******************************************************
          * class that controls all motor movements and speeds.
-        
-        
         */
+        /**
+         * @param leftMotor
+         * @param rightMotor
+         * @param clawMotor
+         * @param USSTop The top ultrasonic Scanner  
+         * @param USSBottom The bottom ultrasonic Scanner
+         * @param USPTop The top ultrasonic poller
+         * @param USPBottom The bottom ultrasonic poller
+         * @param leftWheelLP The left wheel light poller
+         * @param rightWheelLP The right wheel light poller
+         * @param width The width between wheels 
+         * @param leftRadius Left wheel radius 
+         * @param rightRadius Right wheel radius 
+         */
         public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
                                NXTRegulatedMotor rightMotor, 
                                NXTRegulatedMotor clawMotor,
@@ -36,8 +46,11 @@ public class TwoWheeledRobot {
                                UltrasonicPoller USPTop,
                                UltrasonicPoller USPBottom,
                                LightPoller leftWheelLP,
-                               LightPoller rightWheelLP                         
-                               ) {
+                               LightPoller rightWheelLP,
+                               double width,
+    						   double leftRadius,
+    						   double rightRadius) 
+        {
                 this.leftMotor = leftMotor;
                 this.rightMotor = rightMotor;
                 this.clawMotor=clawMotor;
@@ -47,10 +60,38 @@ public class TwoWheeledRobot {
                 this.USPBottom=USPBottom;
                 this.leftWheelLP=leftWheelLP;
                 this.rightWheelLP=rightWheelLP;
+                this.leftRadius = leftRadius;
+        		this.rightRadius = rightRadius;
+        		this.width = width;
                 
         }
         
-        
+        /**
+         * 
+         * @param leftMotor
+         * @param rightMotor
+         * @param clawMotor
+         * @param USSTop The top ultrasonic Scanner  
+         * @param USSBottom The bottom ultrasonic Scanner
+         * @param USPTop The top ultrasonic poller
+         * @param USPBottom The bottom ultrasonic poller
+         * @param leftWheelLP The left wheel light poller
+         * @param rightWheelLP The right wheel light poller
+         */
+    	public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
+    			NXTRegulatedMotor rightMotor,
+    			NXTRegulatedMotor clawMotor,
+    			UltrasonicScanner USSTop, 
+                UltrasonicScanner USSBottom,
+                UltrasonicPoller USPTop,
+                UltrasonicPoller USPBottom,
+                LightPoller leftWheelLP,
+                LightPoller rightWheelLP) 
+    	{
+    		this(leftMotor, rightMotor,clawMotor,USSTop,USSBottom,USPTop,USPBottom,leftWheelLP,rightWheelLP, DEFAULT_WIDTH, DEFAULT_LEFT_RADIUS, DEFAULT_RIGHT_RADIUS);
+    	}
+    	
+    	
         // accessors used for odometer
         
         public double getDisplacement() 
@@ -77,17 +118,18 @@ public class TwoWheeledRobot {
         }
         
         
-        /***************************[Motor Methods]***************************
-         * the motor methods are bellow.
-         * everything that the motors need to do can be found below
-         * speed of motors can be changed by using the accessors
-        */
+
+        /**
+         * stops the robots motors that controll movement 
+         */
         public void stopMotors()
         {
                 leftMotor.stop();
                 rightMotor.stop();
         }
-        
+        /**
+         * starts the motors that control movement and moves the robot forward
+         */
         public void goForward()
         {
                 leftMotor.setSpeed(forwardSpeed);
@@ -96,7 +138,9 @@ public class TwoWheeledRobot {
                 leftMotor.forward();
                 rightMotor.forward();
         }
-        
+        /**
+         * starts the motors that control movement and moves the robot backward
+         */
         public void goBackward()
         {
                 leftMotor.setSpeed(forwardSpeed);
@@ -105,7 +149,9 @@ public class TwoWheeledRobot {
                 leftMotor.backward();
                 rightMotor.backward();
         }
-        
+        /**
+         * starts the motors that control movement and turns the robot counterclockwise
+         */
         public void rotateCounterClockwise()
         {
                 leftMotor.setSpeed(rotationSpeed);
@@ -115,6 +161,9 @@ public class TwoWheeledRobot {
                 rightMotor.forward();
         }
 
+        /**
+         * starts the motors that control movement and turns the robot clockwise
+         */
         public void rotateClockwise()
         {
                 leftMotor.setSpeed(rotationSpeed);
@@ -123,7 +172,10 @@ public class TwoWheeledRobot {
                 leftMotor.forward();
                 rightMotor.backward();
         }
-        
+        /**
+         * 
+         * @param factor a factor to increase speed(1=100%)
+         */
         public void accelerateRotationClockwise(int factor)
         {
                 
@@ -131,59 +183,89 @@ public class TwoWheeledRobot {
                 rotateClockwise();
                 
         }
-        
+        /**
+         * 
+         * @param factor a factor to increase speed(1=100%)
+         */
         public void deAccelerateRotaionCounterCllockwise(int factor)
         {
-                rotationSpeed+=factor;
+                rotationSpeed+=(factor*rotationSpeed);;
                 rotateCounterClockwise();
         }
-        
+        /**
+         * 
+         * @param factor a factor to increase speed(1=100%)
+         */
         public void accelerateForward(int factor)
         {
-                forwardSpeed+=factor;
+                forwardSpeed+=(factor*forwardSpeed);
                 goForward();
         }
         
+        /**
+         * 
+         * @return the current forward speed
+         */
         public int getForwardSpeed()
         {
                 return this.forwardSpeed;
         }
         
-        // mutators
+        /**
+         * set the current forward speed
+         * @param speed
+         */
         public void setForwardSpeed(int speed)
         {
                 forwardSpeed = speed;
         }
-        
+        /**
+         * set the current Rotation speed
+         * @param speed
+         */
         public void setRotationSpeed(int speed)
         {
                 rotationSpeed = speed;
         }
         
-        /***************[Sensor Methods]****************
-        *All sensor related methods are below
+       /**
+        * start the right light sensor 
         */
-        
-        public void startRightLP(){
+        public void startRightLP()
+        {
         	rightWheelLP.startLightPoller();
-        	
+       
+        /**
+         * start the left light sensor 
+         */
         }
-        public void startLeftLP(){
+        public void startLeftLP()
+        {
         	leftWheelLP.startLightPoller();
-        	
         }
-        public void stopRightLP(){
+        
+        /**
+         * stop right light sensor	
+         */
+        public void stopRightLP()
+        {
         	rightWheelLP.stopLightPoller();
         	
         }
-        public void stopLeftLP(){
+        /**
+         * stop left light sensor	
+         */
+        public void stopLeftLP()
+        {
         	leftWheelLP.stopLightPoller();
         	
         }
-        public int getLeftLightValue(){
+        public int getLeftLightValue()
+        {
         	return leftWheelLP.returnLightValue();
         }
-        public int getRightLightValue(){
+        public int getRightLightValue()
+        {
         	return rightWheelLP.returnLightValue();
         }
         
