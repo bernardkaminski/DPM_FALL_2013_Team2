@@ -2,7 +2,11 @@ import lejos.nxt.LCD;
    
 import lejos.util.Timer; 
 import lejos.util.TimerListener; 
-   
+   /**
+    * this class is a thread that keeps track of the robots position on the field using the rotation of the wheels. 
+    * @author Bernie
+    *
+    */
 public class Odometer implements TimerListener { 
     public static final int DEFAULT_PERIOD = 25; 
     private TwoWheeledRobot robot; 
@@ -11,7 +15,13 @@ public class Odometer implements TimerListener {
     private Object lock; 
     private double x, y, theta; 
     private double [] oldDH, dDH; 
-       
+     
+    /**
+     * 
+     * @param robot the TwoWheeledRobot that gives the odometer access to the motor counts.
+     * @param period the refresh rate
+     * @param start whether to start the thread or not 
+     */
     public Odometer(TwoWheeledRobot robot, int period, boolean start) { 
         // initialise variables 
         this.robot = robot; 
@@ -27,7 +37,7 @@ public class Odometer implements TimerListener {
         if (start) 
             odometerTimer.start(); 
     } 
-       
+    
     public Odometer(TwoWheeledRobot robot) { 
         this(robot, DEFAULT_PERIOD, false); 
     } 
@@ -39,7 +49,10 @@ public class Odometer implements TimerListener {
     public Odometer(TwoWheeledRobot robot, int period) { 
         this(robot, period, false); 
     } 
-       
+    
+    /**
+     * update the position and heading
+     */
     public void timedOut() { 
         robot.getDisplacementAndHeading(dDH); 
         dDH[0] -= oldDH[0]; 
@@ -70,10 +83,7 @@ public class Odometer implements TimerListener {
         } 
     } 
        
-    public TwoWheeledRobot getTwoWheeledRobot() { 
-        return robot; 
-    } 
-       
+   
     // mutators 
     public void setPosition(double [] pos, boolean [] update) { 
         synchronized (lock) { 
