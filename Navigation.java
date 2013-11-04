@@ -2,7 +2,11 @@ import javax.xml.stream.events.Attribute;
 
 import lejos.nxt.comm.RConsole;
 
-
+/**
+ * the class that allows the robot to move tospecific locations. this class also corrects the odometer while traveling to locations. 
+ * @author Bernie
+ *
+ */
 public class Navigation {
 	//Properties of navigation
 	private TwoWheeledRobot robo; 
@@ -53,7 +57,12 @@ public class Navigation {
 	}
 	
 	//Travel To Method
-	
+	/**
+	 * this class that controls the robots traveling 
+	 * @param hasBlock weather or not the robot currently has a block 
+	 * @param x the x coordinate to travel to 
+	 * @param y the y coordinate to travel to 
+	 */
 	public void travelTo(boolean hasBlock, double x, double y){
 		boolean atPosition = false;
 		if(hasBlock){
@@ -214,6 +223,10 @@ public class Navigation {
 		}		
 	}
 	
+	/**
+	 * the method that determines if the robot has crossed a gridline 
+	 * @return true if it has false if it has not crossed a gridline
+	 */
 	public boolean middleLine()
 	{
 		//light 
@@ -225,7 +238,10 @@ public class Navigation {
 		return false;
 	}
 	
-	
+	/**
+	 * this method continually corrects theta while traveling to a point
+	 * @param goalTheta the theta(heading) that is to be reached 
+	 */
 	private void travelingThetaUpdater(double goalTheta)
 	{
 		
@@ -243,7 +259,13 @@ public class Navigation {
         }
 	}
 	
-	//calculate the destination angle of the point 
+	//calculate the destination angle of the point
+	/**
+	 * the method that calculates what the destination angle is 
+	 * @param xDest the x coordinate that is to be traveled to 
+	 * @param yDest the y coordinate that is to be traveled to
+	 * @return the resulting angle that the robot need to be heading 
+	 */
 	public double calDestinationAngle(double xDest, double yDest)
 	{
 		double odomAngle = odo.getAng();//current position
@@ -296,7 +318,12 @@ public class Navigation {
 	}
 	
 	
-	//Turn to method  // not sure why you need to pass a boolean here 
+	//Turn to method  // not sure why you need to pass a boolean here
+	/**
+	 * the method that turns the robot to a heading 
+	 * @param angle the desired angle or heading 
+	 * @param stop weather to stop when the angle is reached 
+	 */
 	public void turnTo(double angle, boolean stop) { 
         
         double error = angle - odo.getAng(); 
@@ -329,16 +356,26 @@ public class Navigation {
     }
 	
 	//Avoid obstacle method
+	/**
+	 * the method that avoids obstacles 
+	 */
 	public void avoidObstacle(){
 		
 	}
 	
 	//Investigate block
+	/**
+	 * this method uses the BlockDifferentiator class to distinguish blocks 
+	 */
 	public void investigateBlock(){
 		
 	}
 	
 	//use pythogorem to know if the robot has travel the set distance
+	/**
+	 * 
+	 * @param d distance in cm to be traveled 
+	 */
 	public void travelSetDistanceStraight(double d)
 		{
 			double startingX = odo.getX();

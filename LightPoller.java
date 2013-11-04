@@ -88,7 +88,7 @@ public class LightPoller implements TimerListener
         		//RConsole.println("polling");
                 synchronized (lock) 
                 {
-                        lightValue = cs.getLightValue();
+                        lightValue = cs.getRawLightValue();
                 }
         }
 }
