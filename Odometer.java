@@ -8,7 +8,7 @@ import lejos.util.TimerListener;
     *
     */
 public class Odometer implements TimerListener { 
-    public static final int DEFAULT_PERIOD = 25; 
+    public static final int DEFAULT_PERIOD = 10; 
     private TwoWheeledRobot robot; 
     private Timer odometerTimer; 
     // position data 
@@ -65,9 +65,7 @@ public class Odometer implements TimerListener {
                
             x += dDH[0] * Math.sin(Math.toRadians(theta)); 
             y += dDH[0] * Math.cos(Math.toRadians(theta)); 
-            LCD.drawString("X: "+x,0,0);
-            LCD.drawString("Y: "+y,0,1);
-            LCD.drawString("H: "+theta,0,2);
+            
         } 
            
         oldDH[0] += dDH[0]; 
@@ -112,21 +110,21 @@ public class Odometer implements TimerListener {
        
     // return X value 
     public double getX() { 
-        synchronized (this) { 
+        synchronized (lock) { 
             return x; 
         } 
     } 
    
     // return Y value 
     public double getY() { 
-        synchronized (this) { 
+        synchronized (lock) { 
             return y; 
         } 
     } 
    
     // return theta value 
-    public double getAng() { 
-        synchronized (this) { 
+    public double getTheta() { 
+        synchronized (lock) { 
             return theta; 
         }
     

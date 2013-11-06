@@ -117,6 +117,15 @@ public class TwoWheeledRobot {
                 data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
         }
         
+        public void pickUpBlock()
+        {
+        	clawMotor.rotate(1);
+        }
+        
+        public void dropBlock()
+        {
+        	clawMotor.rotate(1);
+        }
         
 
         /**

@@ -106,22 +106,22 @@ public class Navigation {
 				boolean detectionComplete=false;
 				
 				//*************************************************i like the west,north,south,est keywords**********************
-				if(odo.getAng() < WEST + GRIDLINE_ANGLE_THRESHOLD && odo.getAng() > WEST - GRIDLINE_ANGLE_THRESHOLD){
+				if(odo.getTheta() < WEST + GRIDLINE_ANGLE_THRESHOLD && odo.getTheta() > WEST - GRIDLINE_ANGLE_THRESHOLD){
 					//If robot is heading west (within threshold)
 					//Use light sensors to update X coordinate as robot travels
 					travellingWest=true;
 				}
-				else if(odo.getAng()< EAST + GRIDLINE_ANGLE_THRESHOLD && odo.getAng()> EAST - GRIDLINE_ANGLE_THRESHOLD){
+				else if(odo.getTheta()< EAST + GRIDLINE_ANGLE_THRESHOLD && odo.getTheta()> EAST - GRIDLINE_ANGLE_THRESHOLD){
 					//If robot is heading west (within threshold)
 					//Use light sensors to update X coordinate as robot travels
 					travellingEast=true;
 				}
-				else if(odo.getAng()<NORTH + GRIDLINE_ANGLE_THRESHOLD && odo.getAng()>NORTH - GRIDLINE_ANGLE_THRESHOLD){
+				else if(odo.getTheta()<NORTH + GRIDLINE_ANGLE_THRESHOLD && odo.getTheta()>NORTH - GRIDLINE_ANGLE_THRESHOLD){
 					//If robot is heading north (within threshold)
 					//Use light sensors to update Y coordinate as the robot travels				
 					travellingNorth=true;
 				}	
-				else if(odo.getAng()<SOUTH + GRIDLINE_ANGLE_THRESHOLD && odo.getAng()>SOUTH - GRIDLINE_ANGLE_THRESHOLD){
+				else if(odo.getTheta()<SOUTH + GRIDLINE_ANGLE_THRESHOLD && odo.getTheta()>SOUTH - GRIDLINE_ANGLE_THRESHOLD){
 					//If robot is heading north (within threshold)
 					//Use light sensors to update Y coordinate as the robot travels				
 					travellingSouth=true;
@@ -246,7 +246,7 @@ public class Navigation {
 	{
 		
         //Heading correction
-        double thetaCorrection=Math.abs(goalTheta-odo.getAng());
+        double thetaCorrection=Math.abs(goalTheta-odo.getTheta());
          
         //handle exceptions over 0-360 line 
         if(thetaCorrection>180){ 
@@ -268,7 +268,7 @@ public class Navigation {
 	 */
 	public double calDestinationAngle(double xDest, double yDest)
 	{
-		double odomAngle = odo.getAng();//current position
+		double odomAngle = odo.getTheta();//current position
 		double dAngle = 0 ;//angle to get to
 		double x = odo.getX();
 		double y = odo.getY();
@@ -326,12 +326,12 @@ public class Navigation {
 	 */
 	public void turnTo(double angle, boolean stop) { 
         
-        double error = angle - odo.getAng(); 
+        double error = angle - odo.getTheta(); 
         robo.setRotationSpeed(STANDARD);
         while (Math.abs(error) > TURNTO_THRESHOLD) { 
                
     
-            error = angle - odo.getAng(); 
+            error = angle - odo.getTheta(); 
             
             //if close reduce speed 
             if(error <= CLOSE)
