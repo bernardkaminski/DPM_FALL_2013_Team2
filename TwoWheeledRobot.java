@@ -12,7 +12,7 @@ public class TwoWheeledRobot {
 	
 		public static final double DEFAULT_LEFT_RADIUS = 2.1;
 		public static final double DEFAULT_RIGHT_RADIUS = 2.1;
-		public static final double DEFAULT_WIDTH = 15.1;
+		public static final double DEFAULT_WIDTH = 16.8;
         private NXTRegulatedMotor leftMotor, rightMotor, clawMotor;
         private UltrasonicScanner USSBottom,USSTop;
         private UltrasonicPoller USPBottom,USPTop;
@@ -116,6 +116,42 @@ public class TwoWheeledRobot {
                 data[0] = (leftTacho * leftRadius + rightTacho * rightRadius) *        Math.PI / 360.0;
                 data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
         }
+        
+        public void rollClawUp()
+        {
+        	clawMotor.forward();
+        }
+        public void rollClawDown()
+        {
+        	clawMotor.backward();
+        }
+        public void stopClaw()
+        {
+        	//clawMotor.stop();
+        	clawMotor.flt();
+        }
+        
+        public void pickUpBlock(int degree)
+        {
+        	clawMotor.rotate(degree);
+        }
+        
+        public void dropBlock(int degree)
+        {
+        	clawMotor.rotate(-degree);
+        }
+        
+        public void setClawAcc(int acc)
+        {
+        	clawMotor.setAcceleration(acc);
+        }
+        
+        public void setclawSpeed (int speed)
+        {
+        	clawMotor.setSpeed(speed);
+        }
+        
+        
         
         
 

@@ -45,7 +45,7 @@ public class Localizer {
 				 }
 			}
 			
-			firstAngle = (int)odo.getAng();
+			firstAngle = (int)odo.getTheta();
 			
 			//latch onto the first angle
 			
@@ -74,7 +74,7 @@ public class Localizer {
 				 }
 			}
 			
-			secondAngle = (int)odo.getAng();
+			secondAngle = (int)odo.getTheta();
 			
 			//get the second angle
 									
