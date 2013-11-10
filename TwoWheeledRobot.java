@@ -12,13 +12,13 @@ public class TwoWheeledRobot {
 	
 		public static final double DEFAULT_LEFT_RADIUS = 2.1;
 		public static final double DEFAULT_RIGHT_RADIUS = 2.1;
-		public static final double DEFAULT_WIDTH = 15.1;
+		public static final double DEFAULT_WIDTH = 16.8;
         private NXTRegulatedMotor leftMotor, rightMotor, clawMotor;
         private UltrasonicScanner USSBottom,USSTop;
         private UltrasonicPoller USPBottom,USPTop;
         private LightPoller rightWheelLP,leftWheelLP;
         private double leftRadius, rightRadius, width;
-        private int forwardSpeed, rotationSpeed;
+        private int forwardSpeed=200, rotationSpeed=120;
         
         /*
          * *******************************************************
@@ -117,15 +117,42 @@ public class TwoWheeledRobot {
                 data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
         }
         
-        public void pickUpBlock()
+        public void rollClawUp()
         {
-        	clawMotor.rotate(1);
+        	clawMotor.forward();
+        }
+        public void rollClawDown()
+        {
+        	clawMotor.backward();
+        }
+        public void stopClaw()
+        {
+        	//clawMotor.stop();
+        	clawMotor.flt();
         }
         
-        public void dropBlock()
+        public void pickUpBlock(int degree)
         {
-        	clawMotor.rotate(1);
+        	clawMotor.rotate(degree);
         }
+        
+        public void dropBlock(int degree)
+        {
+        	clawMotor.rotate(-degree);
+        }
+        
+        public void setClawAcc(int acc)
+        {
+        	clawMotor.setAcceleration(acc);
+        }
+        
+        public void setclawSpeed (int speed)
+        {
+        	clawMotor.setSpeed(speed);
+        }
+        
+        
+        
         
 
         /**
@@ -170,6 +197,7 @@ public class TwoWheeledRobot {
                 rightMotor.forward();
         }
 
+        
         /**
          * starts the motors that control movement and turns the robot clockwise
          */

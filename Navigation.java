@@ -1,5 +1,8 @@
 import javax.xml.stream.events.Attribute;
 
+import lejos.nxt.Button;
+import lejos.nxt.LCD;
+import lejos.nxt.Sound;
 import lejos.nxt.comm.RConsole;
 
 /**
@@ -17,7 +20,8 @@ public class Navigation {
         private boolean hasBlock=false;
         
         //Constants
-        private final double TURNTO_THRESHOLD=1.0;
+        private final double TURNTO_THRESHOLD=2.0;
+        private final double ANGLE_THRESHOLD=.5;
         private final double GRIDLINE_LIGHTVALUE_THRESHOLD=20; //When light sensor returns value less than this threshold a line has been detected
         private final int CLOSE=5;
         private final int SLOW=50;
@@ -27,9 +31,17 @@ public class Navigation {
         private final double SOUTH=180;
         private final double WEST=270;
         private final double EAST=90;
+        private final double SENSOR_OFFSET=4.0;
+       
         private final double GRIDLINE_ANGLE_THRESHOLD=20;
-        private final double TRAVELTO_GOAL_THRESHOLD=1;
-        private final double TRAVELTO_TURN_THRESHOLD=5;
+        private final double TRAVELTO_GOAL_THRESHOLD=2;
+        private final double TRAVELTO_TURN_THRESHOLD=15;
+        private final int LIGHT_DIFFERENCE_CONSTANT=40;// the light constant is a constant for difference the line constant is an absolute filter based on data taken 
+    	private final int LEFT_LINE_VALUE_CONSTANT=535;
+    	private final int RIGHT_LINE_VALUE_CONSTANT=586;
+    	private byte lineCounter = 0;
+    	
+    	
         //Constructor
         public Navigation(TwoWheeledRobot robo, Odometer odo, BlockDifferentiator bd){
                 this.robo=robo;
@@ -46,7 +58,6 @@ public class Navigation {
          * @param y the y coordinate to travel to 
          */
         public void travelTo(boolean hasBlock, double x, double y){
-                boolean atPosition = false;
                 if(hasBlock){
                         //Special code for navigating straight to green/red zone
                         }
@@ -58,28 +69,33 @@ public class Navigation {
                     double dX=x-odo.getX();
             		double dY=y-odo.getY();
                  
-                	while((Math.abs(dX)<TRAVELTO_GOAL_THRESHOLD && Math.abs(dY)<TRAVELTO_GOAL_THRESHOLD))
+                	while(keepGoing(odo.getX(), odo.getY(), x, y))
                         {
                         //Calculate x and y differences
                 		dX=x-odo.getX();
                 		dY=y-odo.getY();
                 		
                     	//Calculate goal theta (desired heading)
-                		double goalTheta=calDestinationAngle(dX, dY); //returning shortest turn angle to point, always positive
-                		//all turning logic in this method
-                		//can be negative
                 		
-                		//Stop light poller while turning
-                		robo.stopLeftLP();
-                		robo.stopRightLP();
+                		double minAng = (Math.atan2((x - odo.getX()), (y - odo.getY()))) * (180.0 / Math.PI); 
+                		if (minAng < 0) minAng += 359.0; //correct heading 
+                		double thetaCorrection=Math.abs(minAng-odo.getTheta()); //handle exceptions over 0-360 line 
+                		if(thetaCorrection>180){ 
+                			thetaCorrection-=360;
+                			} 
+                		if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD){ 
+                			robo.stopLeftLP();
+                            robo.stopRightLP();
+                        	turnTo(minAng,true);
+                        
+                        	robo.startLeftLP();
+                        	robo.startRightLP();}
                 		
                 		//Decide whether to turn, 1st iteration will turn to destination angle
-                		travelingThetaUpdater(goalTheta);//turnTo needs to be changed to turnBy that bernie wrote
-                		
+                		//travelingThetaUpdater(goalTheta);//turnTo needs to be changed to turnBy that bernie wrote
+                		//RConsole.println(Double.toString(goalTheta));
                 		//Restart light poller
-                		robo.startLeftLP();
-                		robo.startRightLP();
-                		
+                		//Sound.beep();
                 		//Robot is pointed in the right direction, move forward
                 		robo.goForward(); 
                         
@@ -107,26 +123,7 @@ public class Navigation {
         }
         
         /**
-         * this method continually corrects theta while traveling to a point
-         * @param goalTheta the theta(heading) that is to be reached 
-         */
-        private void travelingThetaUpdater(double goalTheta)
-        {
-                
-        //Heading correction
-        double thetaCorrection=Math.abs(goalTheta-odo.getTheta());
-         
-        //handle exceptions over 0-360 line 
-        if(thetaCorrection>180){ 
-            thetaCorrection-=360; 
-        } 
-         
-        //Correct theta while moving between gridlines only if error is > than threshold
-        if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD){
-            turnTo(goalTheta,false);
-        }
-        }
-        
+  
         //calculate the destination angle of the point
         /**
          * the method that calculates what the destination angle is 
@@ -134,94 +131,74 @@ public class Navigation {
          * @param yDest the y coordinate that is to be traveled to
          * @return the resulting angle that the robot need to be heading 
          */
-        public double calDestinationAngle(double xDest, double yDest)
-        {
-                double odomAngle = odo.getTheta();//current position
-                double dAngle = 0 ;//angle to get to
-                double x = odo.getX();
-                double y = odo.getY();
-                double changeY = yDest-y;
-                double changeX = xDest-x;
-                if(changeX==0)
-                {
-                        if(changeY>0)
-                        {
-                                dAngle=0;
-                        }
-                        else
-                        {
-                                dAngle=Math.PI;
-                        }
-                }
-                else
-                {
-                        if(changeY==0)
-                        {
-                                if(changeX>0)
-                                {
-                                        dAngle=(Math.PI/2);
-                                }
-                                else
-                                {
-                                        dAngle=(3*Math.PI/2);
-                                }
-                        }
-                        else
-                        {
-                                dAngle = Math.atan(( changeY/changeX));//math.atan returns radians
-                                if((changeX>0 && changeY>0)||(changeX>0 && changeY<0))
-                                {
-                                        dAngle = (Math.PI/2) - dAngle;
-                                }
-                                if((changeX<0 && changeY<0)||(changeX<0 && changeY>0))
-                                {
-                                        dAngle =(3*Math.PI/2)-dAngle;
-                                }
-                                
-                                
-                        }
-                }
-                
-                return Math.toDegrees(dAngle)-odomAngle;
-        }
-        
-        
-        //Turn to method  // not sure why you need to pass a boolean here
-        /**
-         * the method that turns the robot to a heading 
-         * @param angle the desired angle or heading 
-         * @param stop weather to stop when the angle is reached 
-         */
-        public void turnTo(double angle, boolean stop) { 
-        
-        double error = angle - odo.getTheta(); 
-        robo.setRotationSpeed(STANDARD);
-        while (Math.abs(error) > TURNTO_THRESHOLD) { 
-               
-    
-            error = angle - odo.getTheta(); 
-            
-            //if close reduce speed 
-            if(error <= CLOSE)
-            {
-                    robo.setRotationSpeed(SLOW);
-            }
-            
-            if (error < -180.0) { //rotate clockwise at speed defined in Two Wheeled Robot
-                robo.rotateClockwise();
-            } else if (error < 0.0) { //rotate counter clockwise at speed defined in Two Wheeled Robot
-                robo.rotateClockwise();
-            } else if (error > 180.0) { //rotate counter clockwise at speed defined in Two Wheeled Robot
-                robo.rotateClockwise();
-            } else { //rotate clockwise at speed defined in Two Wheeled Robot
-                robo.rotateClockwise();
-            } 
-        } 
-        robo.setRotationSpeed(STANDARD);
-        if (stop) { 
-            robo.stopMotors();} 
-           
-    }
+       public double calDestAngle(double xDest, double yDest)
+	{
+		double dAngle = 0 ;//angle to get to
+		double x = odo.getX();
+		double y = odo.getY();
+		double changeY = yDest-y;
+		double changeX = xDest-x;
+		if(changeX==0)
+		{
+			if(changeY>0)
+			{
+				dAngle=0;
+			}
+			else
+			{
+				dAngle=Math.PI;
+			}
+		}
+		else
+		{
+			if(changeY==0)
+			{
+				if(changeX>0)
+				{
+					dAngle=(Math.PI/2);
+				}
+				else
+				{
+					dAngle=(3*Math.PI/2);
+				}
+			}
+			else
+			{
+				dAngle = Math.atan(( changeY/changeX));//math.atan returns radians
+				if((changeX>0 && changeY>0)||(changeX>0 && changeY<0))
+				{
+					dAngle = (Math.PI/2) - dAngle;
+				}
+				if((changeX<0 && changeY<0)||(changeX<0 && changeY>0))
+				{
+					dAngle =(3*Math.PI/2)-dAngle;
+				}
+			}
+		}
+		
+		return Math.toDegrees(dAngle);
+	}
+	
+     
+   	
+       public void turnTo(double angle, boolean stop) { 
+    	   double error = angle - odo.getTheta(); 
+    	   while (Math.abs(error) > TURNTO_THRESHOLD) {  		     			   		   
+    		   error = angle - odo.getTheta(); 
+    		   if (error < -180.0) { 
+    			   robo.rotateClockwise(); } 
+    		   else if (error < 0.0) {
+    			   robo.rotateCounterClockwise(); } 
+    		   else if (error > 180.0) { 
+    			   robo.rotateCounterClockwise(); } 
+    		   else { 
+    			   robo.rotateClockwise(); } 
+    		   } 
+    	   if (stop) { robo.stopMotors();} 
+    	   }
+	   
+	   
+    	
         
         //Avoid obstacle method
         /**
@@ -264,13 +241,22 @@ public class Navigation {
         	double []leftWheelLineDetectCoords=new double[2]; //Coordinates of robot [x,y] when line is detected by left wheel
         	double []rightWheelLineDetectCoords=new double[2]; //Coordinates of robot [x,y] when line is detected by right wheel 
         
-        	int detectionCount=0;
         	boolean travellingNorth=false; 
         	boolean travellingSouth=false; 
         	boolean travellingEast=false;
         	boolean travellingWest=false;
-        	boolean checkedLeft=false;
-        	boolean checkedRight=false;
+        	double rLight=robo.getRightLightValue();
+        	double lLight= robo.getLeftLightValue();
+        	boolean leftEnteredLine = checkLineLeft(lLight);
+        	boolean rightEnteredLine = checkLineRight(rLight);
+        	if (leftEnteredLine)
+        	{
+        		lineCounter++;
+        	}
+        	if (rightEnteredLine)
+        	{
+        		lineCounter++;
+        	}
         
         	if(odo.getTheta() < WEST + GRIDLINE_ANGLE_THRESHOLD && odo.getTheta() > WEST - GRIDLINE_ANGLE_THRESHOLD){
                 //If robot is heading west (within threshold)
@@ -295,16 +281,16 @@ public class Navigation {
         
         	//Get robots position at each of the two detections
         	//Left wheel light sensor detects a line
-        	if(checkLineLeft(checkedLeft)){
+        	if(leftEnteredLine){
                 leftWheelLineDetectCoords[0]=odo.getX();
-                leftWheelLineDetectCoords[1]=odo.getY();
-                checkedLeft=true;
+                leftWheelLineDetectCoords[1]=odo.getY()+SENSOR_OFFSET ;
+                Sound.beep();
         	}
         	//Right wheel light sensor detects a line
-        	if(checkLineRight(checkedRight)){
+        	if(rightEnteredLine){
                 rightWheelLineDetectCoords[0]=odo.getX();
-                rightWheelLineDetectCoords[1]=odo.getY();          
-                checkedRight=true;
+                rightWheelLineDetectCoords[1]=odo.getY()+SENSOR_OFFSET;
+                Sound.twoBeeps();
         	}
         	
         	//Corrections cannot miss a line 
@@ -313,7 +299,7 @@ public class Navigation {
         	double dT=Math.atan2(dXdetectionPoints, dYdetectionPoints);
                
         	//North travelling correction
-        	if(travellingNorth && checkedLeft && checkedRight){
+        	if(travellingNorth && (lineCounter==2)){
                 double[] position=new double[3];
                 int absoluteY= ((int)(((leftWheelLineDetectCoords[1]+rightWheelLineDetectCoords[1]))/2.0)/30)*30;
                 position[0]=odo.getX();
@@ -329,7 +315,7 @@ public class Navigation {
         	}
         
         	//South travelling correction
-        	if(travellingSouth && checkedLeft && checkedRight){
+        	if(travellingSouth && (lineCounter==2)){
                 double[] position=new double[3];
                 int absoluteY= ((int)(((leftWheelLineDetectCoords[1]+rightWheelLineDetectCoords[1]))/2.0)/30)*30;
                 position[0]=odo.getX();
@@ -345,7 +331,7 @@ public class Navigation {
         	}
         
         	//West travelling correction
-        	if(travellingWest && checkedLeft && checkedRight){
+        	if(travellingWest && (lineCounter==2)){
                 double[] position=new double[3];
                 int absoluteX= ((int)(((leftWheelLineDetectCoords[0]+rightWheelLineDetectCoords[0]))/2.0)/30)*30;
                 position[0]=absoluteX;
@@ -361,7 +347,7 @@ public class Navigation {
         	}
         
         	//East travelling correction
-        	if(travellingEast && checkedLeft && checkedRight){
+        	if(travellingEast && (lineCounter==2)){
                 double[] position=new double[3];
                 int absoluteX= ((int)(((leftWheelLineDetectCoords[0]+rightWheelLineDetectCoords[0]))/2.0)/30)*30;
                 position[0]=absoluteX;
@@ -375,20 +361,65 @@ public class Navigation {
                 boolean[]update={true,false,true};
                 odo.setPosition(position,update);                        
         	}
-        	
+        	if(lineCounter==2)
+        		lineCounter=0;
         }
-       
-        public boolean checkLineLeft(boolean checkLeft){
-        	if(checkLeft=true){
+
+        public boolean checkLineLeft(double lLight)
+        {
+        	double lOld=lLight;
+        	try {
+				Thread.sleep(30);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	lLight=robo.getLeftLightValue();
+        	if(lOld-lLight>(LIGHT_DIFFERENCE_CONSTANT))//&& lLight<LEFT_LINE_VALUE_CONSTANT)
+    			return true;
+        	else
         		return false;
+        	
         	}
         	//otherwise actually check
-        	
-        }
-        public boolean checkLineRight(boolean checkRight){
-        	if(checkRight=true){
+        
+        public boolean checkLineRight( double rLight){
+        
+        	double rOld=rLight;
+        	try {
+				Thread.sleep(30);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	rLight=robo.getLeftLightValue();
+        	if(rOld-rLight>(LIGHT_DIFFERENCE_CONSTANT))//)&& rLight<RIGHT_LINE_VALUE_CONSTANT)
+    			return true;
+        	else
         		return false;
-        	}
+        
+        	
         	//otherwise actually check
         }
+
+        public boolean keepGoing(double xCurrent, double yCurrent, double xDest, double yDest)
+    	{
+    		double distanceFromPoint =Math.sqrt(((xDest-xCurrent)*(xDest-xCurrent))+((yDest-yCurrent)*(yDest-yCurrent)));
+    		LCD.drawString("D:"+distanceFromPoint, 0, 4);
+    		if(distanceFromPoint<TRAVELTO_GOAL_THRESHOLD)// || (this.distance!=0 && this.distance<distanceFromPoint))//distance should keep getting smaller
+    		{
+    			RConsole.println("keep going false");
+    			
+    			//this.distance=distanceFromPoint;
+    			
+    			return false;
+    		}
+    		else
+    		{
+    			//this.distance=distanceFromPoint;Sound.buzz();
+    			
+    			return true;
+    		}
+    	}
 }
