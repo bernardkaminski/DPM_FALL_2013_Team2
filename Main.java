@@ -18,8 +18,6 @@ public class Main {
 		
 		//OdometerTestClass.main();
 		NavigationTest.main();
-		
-		//bluetoothTest.main();
 	}
 
 }

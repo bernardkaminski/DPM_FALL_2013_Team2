@@ -22,7 +22,6 @@ public class LightSensorTest {
 		rightMotor.setSpeed(200);
 		leftMotor.setSpeed(200);
 		
-		
 		//Create pollers
 		LightPoller leftWheelLP= new LightPoller(csLeft);
 		LightPoller rightWheelLP=new LightPoller(csRight);
