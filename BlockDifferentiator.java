@@ -6,7 +6,7 @@ public class BlockDifferentiator {
 	private static UltrasonicScanner usScanner = new UltrasonicScanner(new UltrasonicScanenr(SensorPort.S2));//topsensor uses the usscanner
 	private static TwoWheeledRobot robo;
 	
-	static int difference = 5;
+	static int difference = 20;
 	
 	public BlockDifferentiator(Odometer odo, Navigation nav, TwoWheeledRobot robo){
 		
@@ -38,7 +38,7 @@ public class BlockDifferentiator {
 			usPoller.startUsPoller();
 			
 			//start bottomsensor
-			if(usPoller.returnDistance() <=15){
+			if(usPoller.returnDistance() <=10){
 				
 				robo.stopMotors();
 									
