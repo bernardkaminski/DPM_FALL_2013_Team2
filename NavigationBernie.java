@@ -13,16 +13,12 @@ public class NavigationBernie {
 	private final int LIGHT_DIFFERENCE_CONSTANT=35;// the light constant is a constant for difference the line constant is an absolute filter based on data taken 
 	private final int LEFT_LINE_VALUE_CONSTANT=535;
 	private final int RIGHT_LINE_VALUE_CONSTANT=586;
-	private double distance=0;
 	public  boolean obstacleClose = false;
 	private boolean rwCrossedLine = false;
 	private boolean lwCrossedLine = false;
 	private double  lLight=0;
 	private double rLight=0;
-	
-	/*
-	 * class that controls all the navigation of the robot
-	*/
+	private double distance;
 	
 	//contructor
 	public NavigationBernie(Odometer odo, TwoWheeledRobot robot, BlockDifferentiator block)
@@ -132,8 +128,6 @@ public class NavigationBernie {
 			return true;
 		}
 	}
-	
-	
 	
 	//turn by a given angle
 	public void turnBy(double TurnAngle)

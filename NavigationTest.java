@@ -5,6 +5,7 @@ import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.RConsole;
 
 
@@ -13,7 +14,8 @@ public class NavigationTest
 
 	static void main()
 	{
-		RConsole.openBluetooth(200000);
+		RConsole.openAny(200000);
+		Bluetooth.setFriendlyName("monster");
 		RConsole.println("connected");
 		Sound.beep();
 		LCD.clear();
@@ -44,6 +46,7 @@ public class NavigationTest
 			y=odo.getY();
 			theta = odo.getTheta();
 			RConsole.println("x="+Double.toString(x)+"\ty="+Double.toString(y)+"\ttheta="+Double.toString(theta)+"\ttried to get to x="+Double.toString(xCords[i])+"\ty="+Double.toString(yCords[i]));
+			//Button.waitForAnyPress();
 		}
 		Button.waitForAnyPress();
 			

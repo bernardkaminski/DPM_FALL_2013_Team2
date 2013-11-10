@@ -20,7 +20,7 @@ public class Navigation {
         private boolean hasBlock=false;
         
         //Constants
-        private final double TURNTO_THRESHOLD=2.0;
+        private final double TURNTO_THRESHOLD=1.0;
         private final double ANGLE_THRESHOLD=.5;
         private final double GRIDLINE_LIGHTVALUE_THRESHOLD=20; //When light sensor returns value less than this threshold a line has been detected
         private final int CLOSE=5;
@@ -35,18 +35,25 @@ public class Navigation {
        
         private final double GRIDLINE_ANGLE_THRESHOLD=20;
         private final double TRAVELTO_GOAL_THRESHOLD=2;
-        private final double TRAVELTO_TURN_THRESHOLD=15;
-        private final int LIGHT_DIFFERENCE_CONSTANT=40;// the light constant is a constant for difference the line constant is an absolute filter based on data taken 
+        private final double TRAVELTO_TURN_THRESHOLD=5;
+        private final int LIGHT_DIFFERENCE_CONSTANT=70;// the light constant is a constant for difference the line constant is an absolute filter based on data taken 
     	private final int LEFT_LINE_VALUE_CONSTANT=535;
     	private final int RIGHT_LINE_VALUE_CONSTANT=586;
     	private byte lineCounter = 0;
+    	private int rightLightValue=0;
+    	private int leftLightValue=0;
     	
     	
         //Constructor
         public Navigation(TwoWheeledRobot robo, Odometer odo, BlockDifferentiator bd){
                 this.robo=robo;
                 this.odo=odo;
-                this.bd=bd;        
+                this.bd=bd;
+                robo.startRightLP();
+                robo.startLeftLP();
+                rightLightValue=robo.getRightLightValue();
+            	leftLightValue=robo.getLeftLightValue();
+                
                 
         }
         
@@ -58,129 +65,41 @@ public class Navigation {
          * @param y the y coordinate to travel to 
          */
         public void travelTo(boolean hasBlock, double x, double y){
-                if(hasBlock){
+        	
+       
+        	if(hasBlock){
                         //Special code for navigating straight to green/red zone
                         }
                 
                 else{                        
-                        //Travel to given coordinate while using light sensors to update position
-                	robo.startLeftLP();
-                    robo.startRightLP();
-                    double dX=x-odo.getX();
-            		double dY=y-odo.getY();
-                 
-                	while(keepGoing(odo.getX(), odo.getY(), x, y))
+                        while(keepGoing(odo.getX(), odo.getY(), x, y))
                         {
-                        //Calculate x and y differences
-                		dX=x-odo.getX();
-                		dY=y-odo.getY();
-                		
-                    	//Calculate goal theta (desired heading)
-                		
-                		double minAng = (Math.atan2((x - odo.getX()), (y - odo.getY()))) * (180.0 / Math.PI); 
+                        double minAng = (Math.atan2((x - odo.getX()), (y - odo.getY()))) * (180.0 / Math.PI); 
                 		if (minAng < 0) minAng += 359.0; //correct heading 
                 		double thetaCorrection=Math.abs(minAng-odo.getTheta()); //handle exceptions over 0-360 line 
-                		if(thetaCorrection>180){ 
-                			thetaCorrection-=360;
-                			} 
-                		if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD){ 
-                			robo.stopLeftLP();
-                            robo.stopRightLP();
-                        	turnTo(minAng,true);
-                        
-                        	robo.startLeftLP();
-                        	robo.startRightLP();}
                 		
-                		//Decide whether to turn, 1st iteration will turn to destination angle
-                		//travelingThetaUpdater(goalTheta);//turnTo needs to be changed to turnBy that bernie wrote
-                		//RConsole.println(Double.toString(goalTheta));
-                		//Restart light poller
-                		//Sound.beep();
-                		//Robot is pointed in the right direction, move forward
-                		robo.goForward(); 
-                        
-                		updateOdometry();
-                		                                                
+                		if(thetaCorrection>180)
+                		{ 
+                			thetaCorrection-=360;
+                		} 
+                		if(Math.abs(thetaCorrection)>TRAVELTO_TURN_THRESHOLD)
+                		{ 
+                			//robo.stopLeftLP();
+                            //robo.stopRightLP();
+                        	turnTo(minAng,true);
+                        	//robo.startLeftLP();
+                        	//robo.startRightLP();
                         }
-                        robo.stopMotors();
-                        
+                		
+	                		robo.goForward(); 
+	                		//updateOdometry();                              
+                        }
+                        robo.stopMotors();      
                 }                
         }
-        
-        /**
-         * the method that determines if the robot has crossed a gridline 
-         * @return true if it has false if it has not crossed a gridline
-         */
-        public boolean middleLine()
-        {
-                //light 
-                /*if(Currentlight-Lastlight>(LIGHT_DIFFERENCE_CONSTANT)&& light<GRIDLINE_LIGHTVALUE_THRESHOLD)
-                {
-                
-                }
-                return false;*/
-                return false;
-        }
-        
-        /**
-  
+          
         //calculate the destination angle of the point
-        /**
-         * the method that calculates what the destination angle is 
-         * @param xDest the x coordinate that is to be traveled to 
-         * @param yDest the y coordinate that is to be traveled to
-         * @return the resulting angle that the robot need to be heading 
-         */
-       public double calDestAngle(double xDest, double yDest)
-	{
-		double dAngle = 0 ;//angle to get to
-		double x = odo.getX();
-		double y = odo.getY();
-		double changeY = yDest-y;
-		double changeX = xDest-x;
-		if(changeX==0)
-		{
-			if(changeY>0)
-			{
-				dAngle=0;
-			}
-			else
-			{
-				dAngle=Math.PI;
-			}
-		}
-		else
-		{
-			if(changeY==0)
-			{
-				if(changeX>0)
-				{
-					dAngle=(Math.PI/2);
-				}
-				else
-				{
-					dAngle=(3*Math.PI/2);
-				}
-			}
-			else
-			{
-				dAngle = Math.atan(( changeY/changeX));//math.atan returns radians
-				if((changeX>0 && changeY>0)||(changeX>0 && changeY<0))
-				{
-					dAngle = (Math.PI/2) - dAngle;
-				}
-				if((changeX<0 && changeY<0)||(changeX<0 && changeY>0))
-				{
-					dAngle =(3*Math.PI/2)-dAngle;
-				}
-			}
-		}
-		
-		return Math.toDegrees(dAngle);
-	}
-	
-     
-   	
+       
        public void turnTo(double angle, boolean stop) { 
     	   double error = angle - odo.getTheta(); 
     	   while (Math.abs(error) > TURNTO_THRESHOLD) {  		     			   		   
@@ -197,9 +116,6 @@ public class Navigation {
     	   if (stop) { robo.stopMotors();} 
     	   }
 	   
-	   
-    	
-        
         //Avoid obstacle method
         /**
          * the method that avoids obstacles 
@@ -245,10 +161,10 @@ public class Navigation {
         	boolean travellingSouth=false; 
         	boolean travellingEast=false;
         	boolean travellingWest=false;
-        	double rLight=robo.getRightLightValue();
-        	double lLight= robo.getLeftLightValue();
-        	boolean leftEnteredLine = checkLineLeft(lLight);
-        	boolean rightEnteredLine = checkLineRight(rLight);
+        	
+        	
+        	boolean leftEnteredLine = checkLineLeft();
+        	boolean rightEnteredLine = checkLineRight();
         	if (leftEnteredLine)
         	{
         		lineCounter++;
@@ -284,13 +200,13 @@ public class Navigation {
         	if(leftEnteredLine){
                 leftWheelLineDetectCoords[0]=odo.getX();
                 leftWheelLineDetectCoords[1]=odo.getY()+SENSOR_OFFSET ;
-                Sound.beep();
+                RConsole.println("crossed left line");
         	}
         	//Right wheel light sensor detects a line
         	if(rightEnteredLine){
                 rightWheelLineDetectCoords[0]=odo.getX();
                 rightWheelLineDetectCoords[1]=odo.getY()+SENSOR_OFFSET;
-                Sound.twoBeeps();
+                RConsole.println("crossed right line");
         	}
         	
         	//Corrections cannot miss a line 
@@ -365,42 +281,31 @@ public class Navigation {
         		lineCounter=0;
         }
 
-        public boolean checkLineLeft(double lLight)
+        public boolean checkLineLeft()
         {
-        	double lOld=lLight;
-        	try {
-				Thread.sleep(30);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        	
-        	lLight=robo.getLeftLightValue();
-        	if(lOld-lLight>(LIGHT_DIFFERENCE_CONSTANT))//&& lLight<LEFT_LINE_VALUE_CONSTANT)
-    			return true;
-        	else
-        		return false;
-        	
+        	int lLight=robo.getLeftLightValue();
+        	if(leftLightValue-lLight>(LIGHT_DIFFERENCE_CONSTANT)){//)&& rLight<RIGHT_LINE_VALUE_CONSTANT)
+        		leftLightValue=lLight;
+        		return true;}
+        	else{
+        		leftLightValue=lLight;
+        		return false;}
         	}
         	//otherwise actually check
         
-        public boolean checkLineRight( double rLight){
-        
-        	double rOld=rLight;
-        	try {
-				Thread.sleep(30);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        	rLight=robo.getLeftLightValue();
-        	if(rOld-rLight>(LIGHT_DIFFERENCE_CONSTANT))//)&& rLight<RIGHT_LINE_VALUE_CONSTANT)
-    			return true;
-        	else
-        		return false;
-        
+        public boolean checkLineRight(){
+        	int rLight=robo.getRightLightValue();
+        	if(rightLightValue-rLight>(LIGHT_DIFFERENCE_CONSTANT)){//)&& rLight<RIGHT_LINE_VALUE_CONSTANT)
+        		rightLightValue=rLight;
+        		return true;}
+        	else{
+        		rightLightValue=rLight;
+        		return false;}
         	
-        	//otherwise actually check
+        	
+        	
+  
+        	
         }
 
         public boolean keepGoing(double xCurrent, double yCurrent, double xDest, double yDest)
