@@ -8,7 +8,7 @@ public class BlockDifferentiator {
 	
 	static int difference = 5;
 	
-	public DetectObject(Odometer odo, Navigation nav, TwoWheeledRobot robo){
+	public BlockDifferentiator(Odometer odo, Navigation nav, TwoWheeledRobot robo){
 		
 		this.odo = odo;
 		this.nav = nav;
@@ -22,7 +22,7 @@ public class BlockDifferentiator {
 	
 	public static object OBJECT;
 	
-	public static object detector() throws Exception{
+	public static object identifyBlock() throws Exception{
 		
 		boolean detecting = true;
 		
