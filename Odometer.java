@@ -2,16 +2,26 @@ import lejos.nxt.LCD;
    
 import lejos.util.Timer; 
 import lejos.util.TimerListener; 
-   
+   /**
+    * this class is a thread that keeps track of the robots position on the field using the rotation of the wheels. 
+    * @author Bernie
+    *
+    */
 public class Odometer implements TimerListener { 
-    public static final int DEFAULT_PERIOD = 25; 
+    public static final int DEFAULT_PERIOD = 10; 
     private TwoWheeledRobot robot; 
     private Timer odometerTimer; 
     // position data 
     private Object lock; 
     private double x, y, theta; 
     private double [] oldDH, dDH; 
-       
+     
+    /**
+     * 
+     * @param robot the TwoWheeledRobot that gives the odometer access to the motor counts.
+     * @param period the refresh rate
+     * @param start whether to start the thread or not 
+     */
     public Odometer(TwoWheeledRobot robot, int period, boolean start) { 
         // initialise variables 
         this.robot = robot; 
@@ -27,7 +37,7 @@ public class Odometer implements TimerListener {
         if (start) 
             odometerTimer.start(); 
     } 
-       
+    
     public Odometer(TwoWheeledRobot robot) { 
         this(robot, DEFAULT_PERIOD, false); 
     } 
@@ -39,7 +49,10 @@ public class Odometer implements TimerListener {
     public Odometer(TwoWheeledRobot robot, int period) { 
         this(robot, period, false); 
     } 
-       
+    
+    /**
+     * update the position and heading
+     */
     public void timedOut() { 
         robot.getDisplacementAndHeading(dDH); 
         dDH[0] -= oldDH[0]; 
@@ -52,9 +65,7 @@ public class Odometer implements TimerListener {
                
             x += dDH[0] * Math.sin(Math.toRadians(theta)); 
             y += dDH[0] * Math.cos(Math.toRadians(theta)); 
-            LCD.drawString("X: "+x,0,0);
-            LCD.drawString("Y: "+y,0,1);
-            LCD.drawString("H: "+theta,0,2);
+            
         } 
            
         oldDH[0] += dDH[0]; 
@@ -70,10 +81,7 @@ public class Odometer implements TimerListener {
         } 
     } 
        
-    public TwoWheeledRobot getTwoWheeledRobot() { 
-        return robot; 
-    } 
-       
+   
     // mutators 
     public void setPosition(double [] pos, boolean [] update) { 
         synchronized (lock) { 
@@ -102,22 +110,44 @@ public class Odometer implements TimerListener {
        
     // return X value 
     public double getX() { 
-        synchronized (this) { 
+        synchronized (lock) { 
             return x; 
         } 
     } 
    
     // return Y value 
     public double getY() { 
-        synchronized (this) { 
+        synchronized (lock) { 
             return y; 
         } 
     } 
    
     // return theta value 
-    public double getAng() { 
-        synchronized (this) { 
+    public double getTheta() { 
+        synchronized (lock) { 
             return theta; 
-        } 
-    } 
+        }
+    
+    }
+    public void setTheta(double theta)
+	{
+		synchronized (lock) {
+			this.theta=theta;
+		}
+		
+	}
+	public void setX(double x)
+	{
+		synchronized (lock) {
+			this.x=x;
+		}
+		
+	}
+	public void setY(double y)
+	{
+		synchronized (lock) {
+			this.y=y;
+		}
+		
+	}
 }

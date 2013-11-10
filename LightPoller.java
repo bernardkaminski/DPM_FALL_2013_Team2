@@ -1,8 +1,19 @@
 import lejos.*;
 import lejos.nxt.ColorSensor;
+import lejos.nxt.comm.RConsole;
 import lejos.robotics.Color;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
+
+/**
+ * This is a class that implements the TimerListener interface so that the light sensor will continuously update values
+ * using the ColorSensor class from the LeJos library.
+ * @author Bernie
+ * @version 1.0
+ * @see TimerListener LeJos API
+ * 
+ *
+ */
 
 public class LightPoller implements TimerListener
 {
@@ -17,23 +28,32 @@ public class LightPoller implements TimerListener
         private final int PERIOD = 20;//period of filter. timeout out will be called every this many milliseconds
         private final double FILTER_CONSTANT=0;
 
-        //constructor
+        /**
+         * 
+         * @param cs the color Sensor that will be used to measure light values.
+         * 
+         */
         public LightPoller(ColorSensor cs)
         {
                 this.cs=cs;
                 clock = new Timer(PERIOD, this);
+                lock = new Object();
                 
         }
         
-        //starting method
+        /**
+         * Starts the thread and as a result starts taking light values.
+         */
         public void startLightPoller()
         {
                 cs.setFloodlight(true);
-                cs.setFloodlight(Color.RED);
+                cs.setFloodlight(Color.RED);       
                 clock.start();
         }
         
-        //stoping method
+        /**
+         * Pauses The Thread the thread and as a result light values stop getting updated. 
+         */
         public void stopLightPoller()
         {
                 cs.setFloodlight(false);
@@ -42,26 +62,33 @@ public class LightPoller implements TimerListener
         
         
         // the getter of this poller this is how other classes will get the light value from the sensor
+        /**
+         * 
+         * @return the current light value 
+         */
         public int returnLightValue()
         {
                 synchronized (lock) 
                 {
-                        //passed by value so lightvalue can be private 
+                        //passed by value so lightvalue can be private
                         return lightValue;        
                 }
                 
         }
         
         // what is done repeatedly
-        @Override
+        //@Override
+        /**
+         * method that repeatedly updates the light value 
+         */
         public void timedOut() 
         
         {
                 // some type of filter needs to be added     
-        		
+        		//RConsole.println("polling");
                 synchronized (lock) 
                 {
-                        lightValue = cs.getLightValue();
+                        lightValue = cs.getRawLightValue();
                 }
         }
 }
