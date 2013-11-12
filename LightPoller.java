@@ -30,8 +30,13 @@ public class LightPoller implements TimerListener
         private Object lock;
         
         //all constants go here, they are denoted with the final keyword convention is to use all caps with underscores
+<<<<<<< HEAD
         private final int PERIOD = 15;//period of filter. timeout out will be called every this many milliseconds
         
+=======
+        private final int PERIOD = 5;//period of filter. timeout out will be called every this many milliseconds
+        private final double FILTER_CONSTANT=0;
+>>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
 
         /**
          * 
@@ -53,9 +58,14 @@ public class LightPoller implements TimerListener
          */
         public void startLightPoller()
         {
+<<<<<<< HEAD
                 
                 cs.setFloodlight(true);       
                 
+=======
+                cs.setFloodlight(true);
+                cs.setFloodlight(Color.RED);       
+>>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
                 
                 clock.start();
                              

@@ -9,10 +9,17 @@ import lejos.nxt.Sound;
  */
  
 public class TwoWheeledRobot {
+<<<<<<< HEAD
         
                 public static final double DEFAULT_LEFT_RADIUS = 2.1;
                 public static final double DEFAULT_RIGHT_RADIUS = 2.1;
                 public static final double DEFAULT_WIDTH = 16.8;
+=======
+	
+		public static final double DEFAULT_LEFT_RADIUS = 2.1;
+		public static final double DEFAULT_RIGHT_RADIUS = 2.1;
+		public static final double DEFAULT_WIDTH = 16.8;
+>>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
         private NXTRegulatedMotor leftMotor, rightMotor, clawMotor;
         private UltrasonicScanner USSBottom,USSTop;
         private UltrasonicPoller USPBottom,USPTop;
@@ -118,6 +125,7 @@ public class TwoWheeledRobot {
         }
         
         public void rollClawUp()
+<<<<<<< HEAD
         {
                 clawMotor.forward();
         }
@@ -144,11 +152,43 @@ public class TwoWheeledRobot {
         public void setClawAcc(int acc)
         {
                 clawMotor.setAcceleration(acc);
+=======
+        {
+        	clawMotor.forward();
+        }
+        public void rollClawDown()
+        {
+        	clawMotor.backward();
+        }
+        public void stopClaw()
+        {
+        	//clawMotor.stop();
+        	clawMotor.flt();
+        }
+        
+        public void pickUpBlock(int degree)
+        {
+        	clawMotor.rotate(degree);
+        }
+        
+        public void dropBlock(int degree)
+        {
+        	clawMotor.rotate(-degree);
+        }
+        
+        public void setClawAcc(int acc)
+        {
+        	clawMotor.setAcceleration(acc);
+>>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
         }
         
         public void setclawSpeed (int speed)
         {
+<<<<<<< HEAD
                 clawMotor.setSpeed(speed);
+=======
+        	clawMotor.setSpeed(speed);
+>>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
         }
         
         
