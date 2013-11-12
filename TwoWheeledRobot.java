@@ -9,16 +9,16 @@ import lejos.nxt.Sound;
  */
  
 public class TwoWheeledRobot {
-	
-		public static final double DEFAULT_LEFT_RADIUS = 2.1;
-		public static final double DEFAULT_RIGHT_RADIUS = 2.1;
-		public static final double DEFAULT_WIDTH = 15.1;
+        
+                public static final double DEFAULT_LEFT_RADIUS = 2.1;
+                public static final double DEFAULT_RIGHT_RADIUS = 2.1;
+                public static final double DEFAULT_WIDTH = 16.8;
         private NXTRegulatedMotor leftMotor, rightMotor, clawMotor;
         private UltrasonicScanner USSBottom,USSTop;
         private UltrasonicPoller USPBottom,USPTop;
         private LightPoller rightWheelLP,leftWheelLP;
         private double leftRadius, rightRadius, width;
-        private int forwardSpeed, rotationSpeed;
+        private int forwardSpeed=200, rotationSpeed=120;
         
         /*
          * *******************************************************
@@ -48,8 +48,8 @@ public class TwoWheeledRobot {
                                LightPoller leftWheelLP,
                                LightPoller rightWheelLP,
                                double width,
-    						   double leftRadius,
-    						   double rightRadius) 
+                                                       double leftRadius,
+                                                       double rightRadius) 
         {
                 this.leftMotor = leftMotor;
                 this.rightMotor = rightMotor;
@@ -61,8 +61,8 @@ public class TwoWheeledRobot {
                 this.leftWheelLP=leftWheelLP;
                 this.rightWheelLP=rightWheelLP;
                 this.leftRadius = leftRadius;
-        		this.rightRadius = rightRadius;
-        		this.width = width;
+                        this.rightRadius = rightRadius;
+                        this.width = width;
                 
         }
         
@@ -78,20 +78,20 @@ public class TwoWheeledRobot {
          * @param leftWheelLP The left wheel light poller
          * @param rightWheelLP The right wheel light poller
          */
-    	public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
-    			NXTRegulatedMotor rightMotor,
-    			NXTRegulatedMotor clawMotor,
-    			UltrasonicScanner USSTop, 
+            public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
+                            NXTRegulatedMotor rightMotor,
+                            NXTRegulatedMotor clawMotor,
+                            UltrasonicScanner USSTop, 
                 UltrasonicScanner USSBottom,
                 UltrasonicPoller USPTop,
                 UltrasonicPoller USPBottom,
                 LightPoller leftWheelLP,
                 LightPoller rightWheelLP) 
-    	{
-    		this(leftMotor, rightMotor,clawMotor,USSTop,USSBottom,USPTop,USPBottom,leftWheelLP,rightWheelLP, DEFAULT_WIDTH, DEFAULT_LEFT_RADIUS, DEFAULT_RIGHT_RADIUS);
-    	}
-    	
-    	
+            {
+                    this(leftMotor, rightMotor,clawMotor,USSTop,USSBottom,USPTop,USPBottom,leftWheelLP,rightWheelLP, DEFAULT_WIDTH, DEFAULT_LEFT_RADIUS, DEFAULT_RIGHT_RADIUS);
+            }
+            
+            
         // accessors used for odometer
         
         public double getDisplacement() 
@@ -117,15 +117,42 @@ public class TwoWheeledRobot {
                 data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
         }
         
-        public void pickUpBlock()
+        public void rollClawUp()
         {
-        	clawMotor.rotate(1);
+                clawMotor.forward();
+        }
+        public void rollClawDown()
+        {
+                clawMotor.backward();
+        }
+        public void stopClaw()
+        {
+                //clawMotor.stop();
+                clawMotor.flt();
         }
         
-        public void dropBlock()
+        public void pickUpBlock(int degree)
         {
-        	clawMotor.rotate(1);
+                clawMotor.rotate(degree);
         }
+        
+        public void dropBlock(int degree)
+        {
+                clawMotor.rotate(-degree);
+        }
+        
+        public void setClawAcc(int acc)
+        {
+                clawMotor.setAcceleration(acc);
+        }
+        
+        public void setclawSpeed (int speed)
+        {
+                clawMotor.setSpeed(speed);
+        }
+        
+        
+        
         
 
         /**
@@ -170,6 +197,7 @@ public class TwoWheeledRobot {
                 rightMotor.forward();
         }
 
+        
         /**
          * starts the motors that control movement and turns the robot clockwise
          */
@@ -242,7 +270,7 @@ public class TwoWheeledRobot {
         */
         public void startRightLP()
         {
-        	rightWheelLP.startLightPoller();
+                rightWheelLP.startLightPoller();
        
         /**
          * start the left light sensor 
@@ -250,67 +278,92 @@ public class TwoWheeledRobot {
         }
         public void startLeftLP()
         {
-        	leftWheelLP.startLightPoller();
+                leftWheelLP.startLightPoller();
         }
         
         /**
-         * stop right light sensor	
+         * stop right light sensor        
          */
         public void stopRightLP()
         {
-        	rightWheelLP.stopLightPoller();
-        	
+                rightWheelLP.stopLightPoller();
+                
         }
         /**
-         * stop left light sensor	
+         * stop left light sensor        
          */
         public void stopLeftLP()
         {
-        	leftWheelLP.stopLightPoller();
-        	
+                leftWheelLP.stopLightPoller();
+                
         }
         public int getLeftLightValue()
         {
-        	return leftWheelLP.returnLightValue();
+                return leftWheelLP.returnLightValue();
         }
         public int getRightLightValue()
         {
-        	return rightWheelLP.returnLightValue();
+                return rightWheelLP.returnLightValue();
+        }
+        
+        public int getRightLightDifference()
+        {
+        	return rightWheelLP.deltaLightValue();
+        }
+        
+        public int getLeftLightDifference()
+        {
+        	return leftWheelLP.deltaLightValue();
+        }
+        
+        public boolean lineRight()
+        {
+        	return rightWheelLP.line();
+        }
+        
+        public boolean lineLeft()
+        {
+        	return leftWheelLP.line();
         }
         
         public void startTopUsPoller()
         {
-        	USPTop.startUsPoller();
+                USPTop.startUsPoller();
         }
+        
         public void startUsBottom()
         {
-        	USPBottom.startUsPoller();
+                USPBottom.startUsPoller();
         }
+        
         public void stopTopUsPoller()
         {
-        	USPTop.stopUsPoller();
+                USPTop.stopUsPoller();
         }
+        
         public void stopBottomUsPoller()
         {
-        	USPBottom.stopUsPoller();
+                USPBottom.stopUsPoller();
         }
+        
         public int getBottomUsPollerDistance()
         {
-        	return USPBottom.returnDistance();
+                return USPBottom.returnDistance();
         }
+        
         public int getTopUsPollerDistance()
         {
-        	return USPTop.returnDistance();
+                return USPTop.returnDistance();
         }
         
         //note for ultrasonic scanner the respectice poller should be stopped
         public double scanWithBottomsensor(int amountOfScans)
         {
-        	return USSBottom.getFilteredDistance(amountOfScans);
+                return USSBottom.getFilteredDistance(amountOfScans);
         }
         public double scanWithTopsensor(int amountOfScans)
         {
-        	return USSTop.getFilteredDistance(amountOfScans);
+                return USSTop.getFilteredDistance(amountOfScans);
         }
         
 }
