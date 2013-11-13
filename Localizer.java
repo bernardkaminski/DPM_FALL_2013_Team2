@@ -1,5 +1,5 @@
 
-public class Localizer {
+public class Localizer extends Thread{
 	
 	TwoWheeledRobot robo;
 	Odometer odo;
@@ -57,6 +57,9 @@ public class Localizer {
 			*
 			*/
 			
+			
+			try{Thread.sleep(500);}catch(Exception e){}
+			
 			while(isWall)//robot facing the wall
 			{
 				 if(robo.getBottomUsPollerDistance() >= openArea){
@@ -78,9 +81,9 @@ public class Localizer {
 			
 			//get the second angle
 									
-			if(firstAngle < secondAngle)
+			if(secondAngle < firstAngle)
 				dTheta= 45-(firstAngle + secondAngle)/2;
-			else if(firstAngle > secondAngle)
+			else if(secondAngle > firstAngle)
 				dTheta= 225-(firstAngle + secondAngle)/2;
 			else
 				dTheta= 45;
@@ -91,6 +94,8 @@ public class Localizer {
 			int actualOrientation = (int) (360 - (pos[2] - dTheta)); //actual orientation of the robot when it has latched onto the second value
 					
 			odo.setPosition(new double [] {0.0, 0.0, actualOrientation}, new boolean [] {false, false, true});
+			
+			nav.turnTo(0);
 					
 	}
 
