@@ -1,31 +1,24 @@
-import lejos.nxt.ColorSensor;
+
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.Sound;
+
 /**
  * The class that has all the hardware necessary, it controls the three motors and the four sensors.
- * @author Bernie
+ * @author Bernie, Connor
  * @version 1.0
  * @see UltrasonicPoller,LightPoller,UltrasonicScanner,NXTRegulatedMotor
  */
  
 public class TwoWheeledRobot {
-<<<<<<< HEAD
         
-                public static final double DEFAULT_LEFT_RADIUS = 2.1;
-                public static final double DEFAULT_RIGHT_RADIUS = 2.1;
-                public static final double DEFAULT_WIDTH = 16.8;
-=======
-	
-		public static final double DEFAULT_LEFT_RADIUS = 2.1;
-		public static final double DEFAULT_RIGHT_RADIUS = 2.1;
-		public static final double DEFAULT_WIDTH = 16.8;
->>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
+       	public static final double DEFAULT_LEFT_RADIUS = 2.1;
+        public static final double DEFAULT_RIGHT_RADIUS = 2.1;
+        public static final double DEFAULT_WIDTH = 16.8;
         private NXTRegulatedMotor leftMotor, rightMotor, clawMotor;
         private UltrasonicScanner USSBottom,USSTop;
         private UltrasonicPoller USPBottom,USPTop;
         private LightPoller rightWheelLP,leftWheelLP;
         private double leftRadius, rightRadius, width;
-        private int forwardSpeed=200, rotationSpeed=120;
+        private int forwardSpeed=250, rotationSpeed=90;
         
         /*
          * *******************************************************
@@ -125,7 +118,6 @@ public class TwoWheeledRobot {
         }
         
         public void rollClawUp()
-<<<<<<< HEAD
         {
                 clawMotor.forward();
         }
@@ -152,51 +144,34 @@ public class TwoWheeledRobot {
         public void setClawAcc(int acc)
         {
                 clawMotor.setAcceleration(acc);
-=======
-        {
-        	clawMotor.forward();
-        }
-        public void rollClawDown()
-        {
-        	clawMotor.backward();
-        }
-        public void stopClaw()
-        {
-        	//clawMotor.stop();
-        	clawMotor.flt();
-        }
-        
-        public void pickUpBlock(int degree)
-        {
-        	clawMotor.rotate(degree);
-        }
-        
-        public void dropBlock(int degree)
-        {
-        	clawMotor.rotate(-degree);
-        }
-        
-        public void setClawAcc(int acc)
-        {
-        	clawMotor.setAcceleration(acc);
->>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
         }
         
         public void setclawSpeed (int speed)
         {
-<<<<<<< HEAD
                 clawMotor.setSpeed(speed);
-=======
-        	clawMotor.setSpeed(speed);
->>>>>>> ff9ec29784288ec9b2c364d8ca9a638f92f577a5
         }
         
+        public void stopLeftMotor()
+        {
+        	leftMotor.stop();
+        }
+        public void stopRightMotor()
+        {
+        	rightMotor.stop();
+        }
         
-        
-        
-
+        public void startLeftMotor()
+        {	
+        	leftMotor.setSpeed(forwardSpeed);
+        	leftMotor.forward();
+        }
+        public void startRightMotor()
+        {	
+        	rightMotor.setSpeed(forwardSpeed);
+        	rightMotor.forward();
+        }
         /**
-         * stops the robots motors that controll movement 
+         * stops the robots motors that control movement 
          */
         public void stopMotors()
         {
@@ -345,26 +320,16 @@ public class TwoWheeledRobot {
         {
                 return rightWheelLP.returnLightValue();
         }
-        
-        public int getRightLightDifference()
-        {
-        	return rightWheelLP.deltaLightValue();
+        public void turnOnLeftLight(){
+        	leftWheelLP.turnOnlights();
+        	 
+        	 
         }
-        
-        public int getLeftLightDifference()
-        {
-        	return leftWheelLP.deltaLightValue();
-        }
-        
-        public boolean lineRight()
-        {
-        	return rightWheelLP.line();
-        }
-        
-        public boolean lineLeft()
-        {
-        	return leftWheelLP.line();
-        }
+        public void turnOnRightLight(){
+        	rightWheelLP.turnOnlights();
+        	 
+        	 
+        }       
         
         public void startTopUsPoller()
         {
