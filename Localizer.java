@@ -1,3 +1,6 @@
+import lejos.nxt.Button;
+import lejos.nxt.comm.RConsole;
+
 
 public class Localizer {
 	
@@ -20,37 +23,42 @@ public class Localizer {
 	
 	public void localize()
 	{
-		
+		robo.startUsBottom();
 		int firstAngle, secondAngle;
 		
 		double []pos= new double[3];
 		
-		robo.rotateClockwise();
+		
 		
 			while(isWall)//robot is in front of a wall so move to open area
 			{
-				 if(robo.getBottomUsPollerDistance() >= openArea){
+				
+				 if(robo.getBottomUsPollerDistance() <= openArea){
 					 
 					 isWall=false;
 					 noWall=true;
 				 }
+				 robo.rotateClockwise();
 			}
 			
 			while(noWall)//robot is in a open area so start the actual localization routine 
 			{
+			
 				 if(robo.getBottomUsPollerDistance() < minimumDistance)//stop if the distance is less than 30
 				 {
 					  noWall=false;
 					  isWall=true;
 				 }
+				 robo.rotateClockwise();
 			}
-			
+			robo.stopMotors();
+			Button.waitForAnyPress();
 			firstAngle = (int)odo.getTheta();
 			
 			//latch onto the first angle
 			
-			robo.setRotationSpeed(-ROTATIONSPEED);//start rotating backwards to latch onto second angle
-			
+			robo.setRotationSpeed(ROTATIONSPEED);//start rotating backwards to latch onto second angle
+			robo.rotateCounterClockwise();
 			/*
 			*
 			* ROBOT NOW MOVES IN OPPOSITE DIRECTION TO LATCH ONTO SECOND ANGLE
@@ -59,21 +67,25 @@ public class Localizer {
 			
 			while(isWall)//robot facing the wall
 			{
-				 if(robo.getBottomUsPollerDistance() >= openArea){
+				
+				 if(robo.getBottomUsPollerDistance() <= openArea){
 					 isWall=false;
 					 noWall=true;
 				 }
+				 robo.rotateCounterClockwise();
 			}
 			
 			while(noWall)//robot not facing a wall
 			{
+				
 				 if(robo.getBottomUsPollerDistance() < minimumDistance)
 				 {
 					  noWall=false;
 					  isWall=true;
 				 }
+				 robo.rotateCounterClockwise();
 			}
-			
+			robo.stopMotors();
 			secondAngle = (int)odo.getTheta();
 			
 			//get the second angle
@@ -91,7 +103,8 @@ public class Localizer {
 			int actualOrientation = (int) (360 - (pos[2] - dTheta)); //actual orientation of the robot when it has latched onto the second value
 					
 			odo.setPosition(new double [] {0.0, 0.0, actualOrientation}, new boolean [] {false, false, true});
-					
+			robo.stopBottomUsPoller();
+			
 	}
 
 }

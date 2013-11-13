@@ -13,7 +13,7 @@ public class UltrasonicPoller implements TimerListener{
 	private UltrasonicSensor us;
 	private Timer clock;
     private Object lock;
-    private int PERIOD=100;
+    private int PERIOD=5;
     private int distance=255;
 	
     /**

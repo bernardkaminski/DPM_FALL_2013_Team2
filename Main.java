@@ -16,7 +16,11 @@ public class Main {
 		//uncomment this for ultrasonic poller test
 		//UltrasonicPollerTest.main();
 		
-		OdometerTestClass.main();
+		//OdometerTestClass.main();
+		NavigationTest.main();
+		//UltrasonicPollerTest.main();
+		//bluetoothTest.main();
+		//BTTest.main(null);
 	}
 
 }

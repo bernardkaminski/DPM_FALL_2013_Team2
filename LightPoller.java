@@ -1,6 +1,5 @@
-import lejos.*;
+
 import lejos.nxt.ColorSensor;
-import lejos.nxt.comm.RConsole;
 import lejos.robotics.Color;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
@@ -8,7 +7,7 @@ import lejos.util.TimerListener;
 /**
  * This is a class that implements the TimerListener interface so that the light sensor will continuously update values
  * using the ColorSensor class from the LeJos library.
- * @author Bernie
+ * @author Bernie, Connor
  * @version 1.0
  * @see TimerListener LeJos API
  * 
@@ -25,8 +24,8 @@ public class LightPoller implements TimerListener
         private Object lock;
         
         //all constants go here, they are denoted with the final keyword convention is to use all caps with underscores
-        private final int PERIOD = 20;//period of filter. timeout out will be called every this many milliseconds
-        private final double FILTER_CONSTANT=0;
+        private final int PERIOD = 10;//period of filter. timeout out will be called every this many milliseconds
+        
 
         /**
          * 
@@ -39,6 +38,19 @@ public class LightPoller implements TimerListener
                 clock = new Timer(PERIOD, this);
                 lock = new Object();
                 
+                
+        }
+        public void turnOnlights()
+        {
+        	
+        	cs.setFloodlight(Color.RED);
+        	
+        	
+        }
+        public void turnOfflights()
+        {	
+        	
+        	cs.setFloodlight(false);
         }
         
         /**
@@ -46,10 +58,11 @@ public class LightPoller implements TimerListener
          */
         public void startLightPoller()
         {
-                cs.setFloodlight(true);
-                cs.setFloodlight(Color.RED);       
+                                                                   
                 clock.start();
+                             
         }
+        
         
         /**
          * Pauses The Thread the thread and as a result light values stop getting updated. 
@@ -85,10 +98,12 @@ public class LightPoller implements TimerListener
         
         {
                 // some type of filter needs to be added     
-        		//RConsole.println("polling");
+                        //RConsole.println("polling");
                 synchronized (lock) 
-                {
-                        lightValue = cs.getRawLightValue();
+                {   
+                	
+                	lightValue = cs.getRawLightValue(); //update the new light value                	
+                	
                 }
         }
 }
