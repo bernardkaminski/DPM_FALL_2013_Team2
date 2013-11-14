@@ -55,7 +55,7 @@ public class Navigation {
          * @param x the x coordinate to travel to 
          * @param y the y coordinate to travel to 
          */
-        public void travelTo(boolean hasBlock, double x, double y){
+        public void travelTo(boolean correct ,boolean hasBlock, double x, double y){
         	
             
        
@@ -91,10 +91,14 @@ public class Navigation {
                             	turnTo(minAng,true);
                             }
                             
-                        }                      
-                        fineTune();                                             
-                       }   
-                                
+                        }
+                        if(correct)
+                        	fineTune();                                             
+                        else
+                        	robo.stopMotors();
+                }   
+                       
+                    	   
         }
           
        public void turnTo(double angle, boolean stop) { 

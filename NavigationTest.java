@@ -47,7 +47,7 @@ public class NavigationTest
 		for(int i =0; i<xCords.length;i++)
 		{
 			RConsole.println("enterd loop");
-			nav.travelTo(false, xCords[i], yCords[i]);
+			nav.travelTo(true,false, xCords[i], yCords[i]);
 			
 		}
 		Button.waitForAnyPress();
