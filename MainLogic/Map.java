@@ -82,13 +82,13 @@ public class Map {
 	
 	public Point getDropZoneCenter()
 	{
-		Point p = new Point((dropZone[1].x-dropZone[0].x)/2,(dropZone[1].y-dropZone[0].y)/2 );
+		Point p = new Point((dropZone[1].getx()-dropZone[0].getx())/2,(dropZone[1].gety()-dropZone[0].gety())/2 );
 		return p;
 	}
 	
 	public Point getDeadZoneCenter()
 	{
-		Point p = new Point((deadZone[1].x-deadZone[0].x)/2,(deadZone[1].y-deadZone[0].y)/2 );
+		Point p = new Point((deadZone[1].getx()-deadZone[0].getx())/2,(deadZone[1].gety()-deadZone[0].gety())/2 );
 		return p;
 	}
 	

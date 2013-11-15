@@ -19,10 +19,11 @@ public class Main {
 		//UltrasonicPollerTest.main();
 		
 		//OdometerTestClass.main();
-		NavigationTest.main();
+		//NavigationTest.main();
 		//UltrasonicPollerTest.main();
 		//bluetoothTest.main();
 		//BTTest.main(null);
+		demo.main();
 	}
 
 }

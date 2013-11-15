@@ -39,7 +39,7 @@ public class Search {
 	public final int SCAN_ROTATE_SPEED=50;
 	public final int BLOCK_COUNT_THRESH=10;//20 //3 @70
 	private final int BLOCK_MAX=20; //20 @70
-	private int ANGLE_OFFSET = 4;
+	private int ANGLE_OFFSET = 3;//4
 	
 	public final int CLAW_RAISE_ANGLE=90;
 	public final int CLAW_RAISE_SPEED=250;
@@ -85,7 +85,7 @@ public class Search {
 	 * 4: found block? (0 if no) (1 if yes)
 	 */
 	public int[] Scan(){
-		double goalAngle=odo.getTheta()+135;
+		double goalAngle=odo.getTheta()+150;
 		double currScanDist,avgAngle;
 		boolean onBlock=false;
 		double BlockBeginning=0, BlockEnd,savedAngle;
@@ -112,32 +112,32 @@ public class Search {
 			
 			RConsole.println("S: "+currScanDist+"    "+blockCount);
 			
-			currAng=(int)odo.getTheta()+2;
+			currAng=(int)odo.getTheta()+3;
 			
 			if(currAng>=360){
 				currAng-=360;
 			}
 			
 			//check if a scan point is blocked
-			if(Math.abs(currAng-NORTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+			if(Math.abs(currAng-NORTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[0]==0){
 				result_output[0]=currAng;
 				if(result_output[0]==0){
 					result_output[0]+=1;
 				}
 			}
-			if(Math.abs(currAng-EAST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+			if(Math.abs(currAng-EAST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[1]==0){
 				result_output[1]=currAng;
 				if(result_output[1]==0){
 					result_output[1]+=1;
 				}
 			}
-			if(Math.abs(currAng-SOUTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+			if(Math.abs(currAng-SOUTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[2]==0){
 				result_output[2]=currAng;
 				if(result_output[2]==0){
 					result_output[2]+=1;
 				}
 			}
-			if(Math.abs(currAng-WEST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+			if(Math.abs(currAng-WEST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[3]==0){
 				result_output[3]=currAng;
 				if(result_output[3]==0){
 					result_output[3]+=1;
@@ -236,7 +236,7 @@ public class Search {
 	 * @param goes straight
 	 */
 	public void GrabBlock(){
-		double pushBlockDist=20;
+		double pushBlockDist=25;
 		double blockLeeway=15; //must be smaller than pushblockdist
 		double blockDist;
 		double currX,currY;
@@ -252,7 +252,7 @@ public class Search {
 		
 		
 		//too close
-		if(blockDist<=DEFAULT_GRAB_DISTANCE+blockLeeway){
+		//if(blockDist<=DEFAULT_GRAB_DISTANCE+blockLeeway){
 			nav.travelSetDistanceBackwards(DEFAULT_GRAB_DISTANCE);
 			
 			
@@ -260,18 +260,18 @@ public class Search {
 				blockDist=robo.scanWithBottomsensor(15);
 				robo.goBackward();*/
 			//}
-			robo.stopMotors();
-		}
+			//robo.stopMotors();
+		//}
 		
 		//too far
-		else if(blockDist>DEFAULT_GRAB_DISTANCE+blockLeeway){
+		/*else if(blockDist>DEFAULT_GRAB_DISTANCE+blockLeeway){
 			robo.goForward();
 			while(blockDist>DEFAULT_GRAB_DISTANCE+blockLeeway){
 				blockDist=robo.scanWithBottomsensor(5);
 				robo.goForward();
 			}
 			robo.stopMotors();
-		}
+		}*/
 		
 		//lower claw
 		robo.rotateClawAbsolute(CLAW_LOWER_ANGLE);

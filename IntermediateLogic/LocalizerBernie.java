@@ -21,7 +21,7 @@ public class LocalizerBernie {
 	Odometer odo;
 	
 	
-	private final int LATCH_DISTANCE=50;
+	private final int LATCH_DISTANCE=40;
 	
 	//contructor
 	public LocalizerBernie(TwoWheeledRobot robo,Odometer odo)
@@ -35,11 +35,11 @@ public class LocalizerBernie {
 		int k=0;
 		//robo.startUsBottom();
 		double distance1;
-		/*while (k <500)
+		while (k <10)
 		{
-			distance1=robo.scanWithBottomScaner(2);
+			distance1=robo.scanWithBottomsensor(2);
 			k++;
-		}*/
+		}
 		
 		distance1=robo.scanWithBottomsensor(2);
 		double firstAngle,secondAngle,wideAngle;
@@ -54,15 +54,16 @@ public class LocalizerBernie {
 			}
 			//robo.stopMotors();
 			Sound.beep();
+			firstAngle=odo.getTheta();
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			firstAngle=odo.getTheta();
 			
-			while (distance1<LATCH_DISTANCE)
+			
+			while (distance1<LATCH_DISTANCE&&distance1!=(255))
 			{
 				
 				robo.rotateClockwise();
@@ -76,7 +77,7 @@ public class LocalizerBernie {
 		}
 		else
 		{
-			while(distance1<LATCH_DISTANCE)
+			while(distance1<LATCH_DISTANCE&&distance1!=(255))
 			{
 				RConsole.println("D:"+distance1);
 				robo.rotateCounterClockwise();
@@ -101,7 +102,7 @@ public class LocalizerBernie {
 			Sound.beep();
 			robo.stopMotors();
 			
-			while(distance1 <LATCH_DISTANCE)
+			while(distance1 <LATCH_DISTANCE&&distance1!=(255))
 			{
 				RConsole.println(""+distance1);
 				robo.rotateClockwise();
