@@ -64,9 +64,10 @@ public class LocalizerBernie {
 			
 			while (distance1<LATCH_DISTANCE)
 			{
-				RConsole.println("D:"+distance1);
+				
 				robo.rotateClockwise();
 				distance1=robo.scanWithBottomsensor(2);
+				RConsole.println("D:"+distance1);
 			}
 			secondAngle=odo.getTheta();
 			wideAngle= secondAngle-firstAngle;

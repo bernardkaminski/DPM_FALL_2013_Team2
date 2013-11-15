@@ -39,7 +39,7 @@ public class Search {
 	public final int SCAN_ROTATE_SPEED=50;
 	public final int BLOCK_COUNT_THRESH=10;//20 //3 @70
 	private final int BLOCK_MAX=20; //20 @70
-	private int ANGLE_OFFSET = 6;
+	private int ANGLE_OFFSET = 4;
 	
 	public final int CLAW_RAISE_ANGLE=90;
 	public final int CLAW_RAISE_SPEED=250;
@@ -54,7 +54,8 @@ public class Search {
 	public final double EAST;
 	public final double WEST;
 	public final double POINT_BLOCKED_ERROR=25; //angle
-	public final double POINT_BLOCKED_DIST=40;
+	public final double POINT_BLOCKED_DIST=56;
+	public final double POINT_BLOCKED_CHECK_DIST=POINT_BLOCKED_DIST+5;
 	
 	private TwoWheeledRobot robo;
 	private Navigation nav;
@@ -91,6 +92,7 @@ public class Search {
 		int blockType,blockCount=0;
 		boolean atGoal=false;
 		int[] result_output={0,0,0,0,0};
+		int currAng;
 		
 		//handle boundary cases
 		if(goalAngle>360){
@@ -110,18 +112,36 @@ public class Search {
 			
 			RConsole.println("S: "+currScanDist+"    "+blockCount);
 			
+			currAng=(int)odo.getTheta()+2;
+			
+			if(currAng>=360){
+				currAng-=360;
+			}
+			
 			//check if a scan point is blocked
-			if(Math.abs(odo.getTheta()-NORTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
-				result_output[0]=1;
+			if(Math.abs(currAng-NORTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+				result_output[0]=currAng;
+				if(result_output[0]==0){
+					result_output[0]+=1;
+				}
 			}
-			if(Math.abs(odo.getTheta()-EAST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
-				result_output[1]=1;
+			if(Math.abs(currAng-EAST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+				result_output[1]=currAng;
+				if(result_output[1]==0){
+					result_output[1]+=1;
+				}
 			}
-			if(Math.abs(odo.getTheta()-SOUTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
-				result_output[2]=1;
+			if(Math.abs(currAng-SOUTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+				result_output[2]=currAng;
+				if(result_output[2]==0){
+					result_output[2]+=1;
+				}
 			}
-			if(Math.abs(odo.getTheta()-WEST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
-				result_output[3]=1;
+			if(Math.abs(currAng-WEST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST){
+				result_output[3]=currAng;
+				if(result_output[3]==0){
+					result_output[3]+=1;
+				}
 			}
 		
 			//check for blocks
@@ -183,21 +203,21 @@ public class Search {
 		//RConsole.open();
 		
 		//double check
-		if(result_output[0]==1){
+		if(result_output[0]!=0){
 			//check north
-			result_output[0]=checkCardinal(nav.NORTH);
+			result_output[0]=checkCardinal(result_output[0]);
 		}
-		if(result_output[1]==1){
-			//check north
-			result_output[1]=checkCardinal(nav.EAST);
+		if(result_output[1]!=0){
+			//check east
+			result_output[1]=checkCardinal(result_output[1]);
 		}
-		if(result_output[2]==1){
-			//check north
-			result_output[2]=checkCardinal(nav.SOUTH);
+		if(result_output[2]!=0){
+			//check south
+			result_output[2]=checkCardinal(result_output[2]);
 		}
-		if(result_output[3]==1){
-			//check north
-			result_output[3]=checkCardinal(nav.WEST);
+		if(result_output[3]!=0){
+			//check west
+			result_output[3]=checkCardinal(result_output[3]);
 		}
 		
 		return result_output;
@@ -205,10 +225,10 @@ public class Search {
 	
 	private int checkCardinal(double input){
 		nav.turnTo(input,true);
-		if(block_diff.identifyBlock(POINT_BLOCKED_DIST)==1){
-			return 1;
+		if(block_diff.identifyBlock(POINT_BLOCKED_CHECK_DIST)==1){
+			return 0;
 		}
-		return 0;
+		return 1;
 	}
 	
 	/**
@@ -262,8 +282,10 @@ public class Search {
 		//raise claw and grab block
 		robo.rotateClawAbsolute(CLAW_RAISE_ANGLE);
 		robo.stopClaw();
-		if(robo.getBottomUsPollerDistance()<DEFAULT_GRAB_DISTANCE+blockLeeway)
+		double temp=robo.scanWithBottomsensor(5);
+		if(temp<DEFAULT_GRAB_DISTANCE+blockLeeway)
 		{
+			RConsole.println("RECUSRION GRAB "+temp);
 			GrabBlock();
 		}
 		

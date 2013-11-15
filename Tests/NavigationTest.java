@@ -80,7 +80,7 @@ public class NavigationTest
 			robo.rotateClawAbsolute(search.CLAW_RAISE_ANGLE);
 			
 			//loc.doLocalization();
-			//locb.localizeTheta();
+			locb.localizeTheta();
 			//Button.waitForAnyPress();
 			for(int i =0; i<xCords.length;i++)
 			{
@@ -88,6 +88,12 @@ public class NavigationTest
 				nav.travelTo(true,false, xCords[i], yCords[i]);
 				nav.turnTo(320, true);	
 				scanResults = search.Scan();
+				if(scanResults[4]==1)
+				{
+					break;
+					
+				}
+				
 				nav.turnTo(90, true);
 				
 				for(int j=0 ; j<scanResults.length;j++)
@@ -101,6 +107,11 @@ public class NavigationTest
 					i++;
 					
 				}
+				if(scanResults[4]==1)
+				{
+					break;
+					
+				}
 				if(scanResults[1]==1&&xCords[i+1]>xCords[i]){
 					//East blocks and next point is east
 					nav.travelTo(true, false, xCords[i],yCords[i]+30);
@@ -109,14 +120,14 @@ public class NavigationTest
 					nav.turnTo(90, true);
 					i++;
 				}
-				
-				//nav.travelTo(true,false, xCords[i], yCords[i]);
-				
 				if(scanResults[4]==1)
 				{
 					break;
 					
 				}
+				//nav.travelTo(true,false, xCords[i], yCords[i]);
+				
+				
 				nav.travelSetDistanceBackwards(4);
 				nav.fineTune();
 			}
