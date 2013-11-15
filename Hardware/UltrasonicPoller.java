@@ -1,3 +1,4 @@
+package Hardware;
 import lejos.nxt.UltrasonicSensor;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
@@ -13,7 +14,7 @@ public class UltrasonicPoller implements TimerListener{
 	private UltrasonicSensor us;
 	private Timer clock;
     private Object lock;
-    private int PERIOD=5;
+    private int PERIOD=20;
     private int distance=255;
 	
     /**

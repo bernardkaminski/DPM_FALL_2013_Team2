@@ -1,3 +1,6 @@
+package Tests;
+import Hardware.TwoWheeledRobot;
+import Hardware.UltrasonicPoller;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;

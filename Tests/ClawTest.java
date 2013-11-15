@@ -1,3 +1,5 @@
+package Tests;
+import Hardware.TwoWheeledRobot;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.MotorPort;

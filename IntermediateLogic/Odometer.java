@@ -1,3 +1,5 @@
+package IntermediateLogic;
+import Hardware.TwoWheeledRobot;
 import lejos.nxt.LCD;
    
 import lejos.util.Timer; 
@@ -8,7 +10,7 @@ import lejos.util.TimerListener;
     *
     */
 public class Odometer implements TimerListener { 
-    public static final int DEFAULT_PERIOD = 10; 
+    public static final int DEFAULT_PERIOD = 15; 
     private TwoWheeledRobot robot; 
     private Timer odometerTimer; 
     // position data 

@@ -1,3 +1,5 @@
+package Run;
+import Tests.NavigationTest;
 import lejos.nxt.LCD;
 
 

@@ -1,3 +1,4 @@
+package Tests;
 import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.RConsole;
 

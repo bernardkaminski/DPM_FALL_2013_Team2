@@ -1,4 +1,8 @@
+package IntermediateLogic;
+
 import javax.microedition.sensor.UltrasonicSensorInfo;
+
+import Hardware.TwoWheeledRobot;
 
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
@@ -29,31 +33,40 @@ public class LocalizerBernie {
 	public void localizeTheta()
 	{
 		int k=0;
-		robo.startUsBottom();
-		int distance1=robo.getBottomUsPollerDistance();
-		while (k <500)
+		//robo.startUsBottom();
+		double distance1;
+		/*while (k <500)
 		{
-			distance1=robo.getBottomUsPollerDistance();
+			distance1=robo.scanWithBottomScaner(2);
 			k++;
-		}
+		}*/
+		
+		distance1=robo.scanWithBottomsensor(2);
 		double firstAngle,secondAngle,wideAngle;
 		if(distance1>LATCH_DISTANCE)
 		{
 			while(distance1>LATCH_DISTANCE)
 			{
-				RConsole.println("D:"+distance1);
+				
 				robo.rotateClockwise();
-				distance1=robo.getBottomUsPollerDistance();
+				distance1=robo.scanWithBottomsensor(2);
+				RConsole.println("D:"+distance1);
 			}
-			robo.stopMotors();
+			//robo.stopMotors();
 			Sound.beep();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			firstAngle=odo.getTheta();
 			
 			while (distance1<LATCH_DISTANCE)
 			{
 				RConsole.println("D:"+distance1);
 				robo.rotateClockwise();
-				distance1=robo.getBottomUsPollerDistance();
+				distance1=robo.scanWithBottomsensor(2);
 			}
 			secondAngle=odo.getTheta();
 			wideAngle= secondAngle-firstAngle;
@@ -66,26 +79,32 @@ public class LocalizerBernie {
 			{
 				RConsole.println("D:"+distance1);
 				robo.rotateCounterClockwise();
-				distance1=robo.getBottomUsPollerDistance();
+				distance1=robo.scanWithBottomsensor(2);
 			}
 			firstAngle=360-odo.getTheta();
-			robo.stopMotors();
+			robo.rotateClockwise();
 			Sound.beep();
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			//Button.waitForAnyPress();
 			while(distance1 >LATCH_DISTANCE)
 			{
-				RConsole.println(Integer.toString(distance1));
+				RConsole.println(""+distance1);
 				robo.rotateClockwise();
-				distance1=robo.getBottomUsPollerDistance();
+				distance1=robo.scanWithBottomsensor(2);
 			}
 			Sound.beep();
 			robo.stopMotors();
 			
 			while(distance1 <LATCH_DISTANCE)
 			{
-				RConsole.println(Integer.toString(distance1));
+				RConsole.println(""+distance1);
 				robo.rotateClockwise();
-				distance1=robo.getBottomUsPollerDistance();
+				distance1=robo.scanWithBottomsensor(2);
 			}
 			
 			secondAngle=odo.getTheta();
@@ -95,7 +114,7 @@ public class LocalizerBernie {
 			//Button.waitForAnyPress();
 		}
 		robo.stopMotors();
-		robo.stopBottomUsPoller();
+		//robo.stopBottomUsPoller();
 		double currentAngle = 225 +(wideAngle/2);
 		odo.setTheta(currentAngle);
 		

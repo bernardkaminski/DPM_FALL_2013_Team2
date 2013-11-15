@@ -1,4 +1,6 @@
+package Run;
 import lejos.nxt.LCD;
+import MainLogic.Map;
 import bluetooth.BluetoothConnection;
 import bluetooth.Transmission;
 
@@ -8,7 +10,7 @@ public class demo {
 	/**
 	 * @param args
 	 */
-	static void main(String[] args) 
+	void main(String[] args) 
 	{
 
 		BluetoothConnection conn = new BluetoothConnection();

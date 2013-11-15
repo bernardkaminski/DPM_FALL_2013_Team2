@@ -1,3 +1,5 @@
+package MainLogic;
+
 /**
  * This class keeps track of the board for the robot
  * @author Bernie

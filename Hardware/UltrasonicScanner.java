@@ -1,3 +1,4 @@
+package Hardware;
 import lejos.nxt.UltrasonicSensor;
 
 /**

@@ -1,4 +1,6 @@
+package IntermediateLogic;
 
+import Hardware.TwoWheeledRobot;
 import lejos.nxt.comm.RConsole;
 
 /**
@@ -17,20 +19,20 @@ public class Navigation {
         
         //Constants
              
-        private final int SLOW=100;
+        private final int SLOW=75;
         private final int STANDARD=200;
         private final int FAST=300;
-        private final double NORTH=0;
-        private final double SOUTH=180;
-        private final double WEST=270;
-        private final double EAST=90;     
+        public final double NORTH=0;
+        public final double SOUTH=180;
+        public final double WEST=270;
+        public final double EAST=90;         
         private final double GRIDLINE_ANGLE_THRESHOLD=35;
         private final double TRAVELTO_GOAL_THRESHOLD=5;
-        private final double TURNTO_THRESHOLD=1.0; 
+        private final double TURNTO_THRESHOLD=2.0; 
         private final double TRAVELTO_TURN_THRESHOLD=4;//WAS 4
         private final int LINE_LIGHTVALUE_MAX=515;
         private final int LINE_LIGHTVALUE_MIN=400;   
-        private final int SLOW_TURNTHRESHOLD=5;
+        private final int SLOW_TURNTHRESHOLD=8;
         private final int SMOOTH_THETA_CORRECTION_THRESHOLD=1;
         private int leftLightValue;
         private int rightLightValue;
@@ -102,11 +104,15 @@ public class Navigation {
         }
           
        public void turnTo(double angle, boolean stop) { 
+    	   		if((int)angle==360)
+    	   		{
+    	   			angle = 0;
+    	   		}
                double error = angle - odo.getTheta();              
                while (Math.abs(error) > TURNTO_THRESHOLD) {                                                                     
             	   if(Math.abs(error)<SLOW_TURNTHRESHOLD)
             	   {
-            		   robo.setRotationSpeed(90);
+            		   robo.setRotationSpeed(SLOW);
             	   }
             	   else
             	   {
@@ -182,6 +188,18 @@ public class Navigation {
                         }
                         robo.stopMotors();
                 }
+        
+        public void travelSetDistanceBackwards(double d)
+        {
+                double startingX = odo.getX();
+                double startingY = odo.getY();
+                robo.setForwardSpeed(STANDARD);
+                while ((Math.pow(odo.getX()-startingX, 2) + Math.pow(odo.getY()-startingY, 2)) < Math.pow(d, 2))
+                {
+                    robo.goBackward();
+                }
+                robo.stopMotors();
+        }
         
         public String getCardinalHeading(){
         		if(odo.getTheta() < (WEST + GRIDLINE_ANGLE_THRESHOLD) && odo.getTheta() > (WEST - GRIDLINE_ANGLE_THRESHOLD)){
