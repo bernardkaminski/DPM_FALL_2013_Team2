@@ -1,4 +1,6 @@
 
+package Hardware;
+
 import lejos.nxt.NXTRegulatedMotor;
 
 /**
@@ -127,8 +129,8 @@ public class TwoWheeledRobot {
         }
         public void stopClaw()
         {
-                //clawMotor.stop();
-                clawMotor.flt();
+                clawMotor.stop();
+                //clawMotor.flt();
         }
         
         public void pickUpBlock(int degree)
@@ -138,7 +140,14 @@ public class TwoWheeledRobot {
         
         public void dropBlock(int degree)
         {
-                clawMotor.rotate(-degree);
+        		clawMotor.flt(true);
+                //clawMotor.rotate(-degree);
+        }
+        
+        public void rotateClawAbsolute(int degree)
+        {
+        		clawMotor.rotateTo(degree,false);
+        		//clawMotor.lock(100);
         }
         
         public void setClawAcc(int acc)
@@ -254,6 +263,25 @@ public class TwoWheeledRobot {
                 goForward();
         }
         
+        public void accelerateLeftWheel(double factor)
+        {
+        	factor = (factor*forwardSpeed);
+        	leftMotor.setSpeed(forwardSpeed+(int)factor);
+            rightMotor.setSpeed(forwardSpeed);
+            
+            leftMotor.forward();
+            rightMotor.forward();
+        }
+        
+        public void accelerateRightWheel(double factor)
+        {
+        	factor = (factor*forwardSpeed);
+        	leftMotor.setSpeed(forwardSpeed);
+            rightMotor.setSpeed(forwardSpeed+(int)factor);
+            
+            leftMotor.forward();
+            rightMotor.forward();
+        }
         /**
          * 
          * @return the current forward speed

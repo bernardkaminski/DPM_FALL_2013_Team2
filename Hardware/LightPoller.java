@@ -1,3 +1,4 @@
+package Hardware;
 
 import lejos.nxt.ColorSensor;
 import lejos.robotics.Color;

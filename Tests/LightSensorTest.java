@@ -1,3 +1,5 @@
+package Tests;
+import Hardware.LightPoller;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
