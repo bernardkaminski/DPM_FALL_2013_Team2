@@ -64,17 +64,17 @@ public class Navigation {
          * @param y the y coordinate to travel to
          */
         public void travelTo(boolean correct ,boolean hasBlock, double x, double y){
-        	RConsole.println("T:"+x+"   "+y);
+        	//RConsole.println("T:"+x+"   "+y);
                 if(hasBlock)
                 {
-                RConsole.println("hasblock entered");
+                //RConsole.println("hasblock entered");
                 //robo.startUsBottom();
                 robo.setForwardSpeed(50);
                 while(keepGoing(odo.getX(), odo.getY(), x, y))
                      {
                 //RConsole.println(robo.getBottomUsPollerDistance()+" ");
                 if(robo.scanWithTopsensor(2)<DETECT_DISTANCE){
-                RConsole.print("40 detected");
+                //RConsole.print("40 detected");
                     robo.stopMotors();
                     double head =odo.getTheta()+90;
                     if(head>=360)
@@ -123,11 +123,11 @@ public class Navigation {
                 }
                
                 else{  
-                RConsole.println("hasblock not entered");
+                //RConsole.println("hasblock not entered");
 
                         while(keepGoing(odo.getX(), odo.getY(), x, y))
                         {
-                        RConsole.println("keepgoing without hasblock");
+                        //RConsole.println("keepgoing without hasblock");
                  
                     double minAng = (Math.atan2((x - odo.getX()), (y - odo.getY()))) * (180.0 / Math.PI);
                             if (minAng < 0) minAng += 359.0; //correct heading

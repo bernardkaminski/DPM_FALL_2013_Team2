@@ -1,297 +1,382 @@
 package MainLogic;
+import java.util.ArrayList;
+import lejos.*;
+import lejos.nxt.comm.RConsole;
 import Hardware.*;
 import IntermediateLogic.*;
-/*Two methods:
- * 
- * (1) GrabBlock:
- * Input a heading in degrees.
- * The robot will rotate at its current location to that heading.
- * The robot will then move forward while polling with the bottom US Sensor.
- * Once the grab distance+threshold is reached the robot will stop.
- * The claw will then lower.
- * The robot will then move forward with the claw lowered, slightly pushing the block.
- * The claw will then close and raise in one motion.
- * (If time permits, the robot will then check if a block is still on the ground in front of it.
- */
-
-//changed two wheeled robot to asbolute degree
-
-/**
- * 
- * @author Miguel
- * @version 1.0
- *
- */
-
-import java.util.ArrayList;
-
-import lejos.nxt.LCD;
-import lejos.nxt.Sound;
-import lejos.nxt.comm.RConsole;
 
 public class Search {
+        
+        public static final double DEFAULT_GRAB_DISTANCE = 13.5; //CM. Distance from wheel axle to closest part of block when block is pushed agains the robot.
+        
+        //SCAN VARIABLES
+        public final double ANGLE_INCREASE=180;
+        private final double SCAN_ROTATE_THRESH=1.0; //slightly greater than TURNTO_THRESHOLD in navigation
+        private final int SCAN_ROTATE_SPEED=50;
+        private final int NUM_US_SCANS=2; //will have to empirically determine
+        
+        //PROCESS DATA VARIABLES
+        private final double REQ_BLUE_CERT=0.75;//0.85 //percentage to be sure its a blue
+        private final double REQ_WOOD_CERT=0.5; //0.5 //percent. lower than this value to be sure its a wood block
+        
+        //SECTION VARIABLES
+        private final double SCAN_DIST_THRESH=26;
+        private final double SCAN_DIST_BAND=1; //5
+        private final int BLOCK_COUNT_THRESH=40; //might have to change this
+        private final int BLOCK_COUNT_MIN=10;
+        
+        //BLOCK DIFFERENTIATE VARIABLES
+        private final double DIFFERENTIATE_DIFF=4;
+        private final double DIFFERENTIATE_RANGE=50;
+        
+        //CARDINAL HEADING VARIABLES
+        private final double NORTH;
+        private final double SOUTH;
+        private final double EAST;
+        private final double WEST;
+        private final double POINT_BLOCKED_ERROR=20; //angle
+        private final double POINT_BLOCKED_DIST=45;
+        private final int WOOD_COUNT_MIN=5;//5
+        
+        //GRAB BLOCK VARIABLES
+    public final int CLAW_RAISE_ANGLE=90;
+    public final int CLAW_RAISE_SPEED=100;//250
+    public final int CLAW_RAISE_ACC=100;//150
+    public final int CLAW_LOWER_ANGLE=-55;
+    public final int CLAW_LOWER_SPEED=50;
+    public final int CLAW_LOWER_ACC=80;
+    private final int CLAW_RECUR_LIM=4;
+    private int recursion_count=0;
+        
+        //objects
+        private TwoWheeledRobot robo;
+        private Navigation nav;
+        private Odometer odo;
+        
+        
+        public Search(TwoWheeledRobot robo,Navigation nav,Odometer odo){
+                this.robo=robo;
+                this.nav=nav;
+                this.odo=odo;
+                
+                //assign cardinal directions
+                this.NORTH=nav.NORTH;
+                this.EAST=nav.EAST;
+                this.SOUTH=nav.SOUTH;
+                this.WEST=nav.WEST;
+        }
+        
+        /**
+         * output:
+         * 0: NORTH scan point (0 if clear) (1 if blocked)
+         * 1: EAST scan point (0 if clear) (1 if blocked)
+         * 2: SOUTH scan point (0 if clear) (1 if blocked)
+         * 3: WEST scan point (0 if clear) (1 if blocked)
+         * 4: found block? (0 if no) (1 if yes)
+         */
+        public int[] Scan(boolean hasBlock){
+                double goalAngle=odo.getTheta()+ANGLE_INCREASE;
+                int[] output_array={0,0,0,0,0};
+                double most_blue=0;
+                int most_blue_index=0;
+                
+                //handle boundary cases
+                if(goalAngle>=360){
+                        goalAngle-=360;
+                }
+                
+                robo.rotateClawAbsolute(CLAW_RAISE_ANGLE);
+                
+                //variables
+                ArrayList<Double> headings = new ArrayList<Double>();
+                ArrayList<Double> topData = new ArrayList<Double>();
+                ArrayList<Double> bottomData = new ArrayList<Double>();
+                ArrayList<ArrayList<Double>> blocks = new ArrayList<ArrayList<Double>>();
+                
+            
+                //rotate and gather data
+                robo.setRotationSpeed(SCAN_ROTATE_SPEED);
+                robo.rotateClockwise();                
+                while(Math.abs(odo.getTheta()-goalAngle)>SCAN_ROTATE_THRESH){
+                        topData.add(robo.scanWithTopsensor(NUM_US_SCANS));
+                        bottomData.add(robo.scanWithBottomsensor(NUM_US_SCANS));
+                        headings.add(odo.getTheta());
+                }
+                robo.stopMotors();
+                
+                //------------processData---------------
+                
+                blocks=processScanData(headings,topData,bottomData,output_array);
+                
+                //--------------------------------------
+                
+                //print data
+                /*for(int i=0;i<headings.size();i++){
+                        RConsole.print(headings.get(i)+"\t");
+                }
+                RConsole.println("");
+                for(int i=0;i<topData.size();i++){
+                        RConsole.print(topData.get(i)+"\t");
+                }
+                RConsole.println("");
+                for(int i=0;i<bottomData.size();i++){
+                        RConsole.print(bottomData.get(i)+"\t");
+                }
+                
+                //print blocks
+                RConsole.println("num of blocks: "+blocks.size());
+                for(int i=0;i<blocks.size();i++){
+                        RConsole.println("start: "+blocks.get(i).get(0)+" end: "+blocks.get(i).get(1)+" avg: "+blocks.get(i).get(2)+" type: "+blocks.get(i).get(3));
+                }*/
+                
+                //find most likely blue block
+                for(int i=0;i<blocks.size();i++){
+                        if(blocks.get(i).get(3)>most_blue){
+                                most_blue=blocks.get(i).get(3);
+                                most_blue_index=i;
+                        }
+                }
+                
+                //maybe grab block
+                if(most_blue>REQ_BLUE_CERT&&!hasBlock){
+                        //GRABBING METHOD HERE
+                        //WILL PROBABLY WANT OFFSET
+                        //RConsole.println("\nGrabbing: "+blocks.get(most_blue_index).get(0)+" end: "+blocks.get(most_blue_index).get(1)+" avg: "+blocks.get(most_blue_index).get(2)+" type: "+blocks.get(most_blue_index).get(3));
+                        output_array[4]=1;
+                        nav.turnTo(blocks.get(most_blue_index).get(2), true);
+                        GrabBlock();
+                }
+                
+                //print output array
+                /*RConsole.println("\noutput_array: ");
+                for(int i=0;i<output_array.length;i++)
+                        RConsole.print(" "+output_array[i]);
+                
+                
+                RConsole.close();*/
+                return output_array;
+        }
+        
+        private ArrayList<ArrayList<Double>> processScanData(ArrayList<Double> headings,ArrayList<Double> topData,ArrayList<Double> bottomData,int[] main_output){
+                ArrayList<Integer> startIndexes = new ArrayList<Integer>();
+                ArrayList<Integer> endIndexes = new ArrayList<Integer>();
+                ArrayList<ArrayList<Integer>> tempIndexes= new ArrayList<ArrayList<Integer>>();
+                ArrayList<Integer> blockDiff = new ArrayList<Integer>();
+                ArrayList<ArrayList<Double>> output_blocks = new ArrayList<ArrayList<Double>>();
+                        //INFO ABOUT BLOCKS:
+                        //0:start heading
+                        //1:end heading
+                        //2:avg heading
+                        //3:certainty of blue block
+                
+                //sectioning
+                tempIndexes=SectionData(headings,bottomData);
+                startIndexes=tempIndexes.get(0);
+                endIndexes=tempIndexes.get(1);
+                
+                //blockDifferentiating
+                blockDiff=blockDifferentiate(topData,bottomData);
+                
+                /*RConsole.println("blockDiff size: "+blockDiff.size());
+                RConsole.println("topData size: "+topData.size());
+                RConsole.println("bottomData size: "+bottomData.size());*/
+                
+                //create blocks
+                for(int i=0;i<startIndexes.size();i++){
+                        //needs to recreate each time
+                        ArrayList<Double> temp_block = new ArrayList<Double>();
+                        
+                        temp_block.add(headings.get(startIndexes.get(i)));
+                        temp_block.add(headings.get(endIndexes.get(i)));
+                        temp_block.add((temp_block.get(0)+temp_block.get(1))/2);
+                        
+                        //blue certainty
+                        temp_block.add(getListAvg(blockDiff,startIndexes.get(i),endIndexes.get(i)));
+                        
+                        //append
+                        output_blocks.add(temp_block);
+                        
+                }
+                
+                //check cardinals -done by referencing
+                main_output[0]=checkCardinals(headings,topData,bottomData,blockDiff,NORTH);
+                main_output[1]=checkCardinals(headings,topData,bottomData,blockDiff,EAST);
+                main_output[2]=checkCardinals(headings,topData,bottomData,blockDiff,SOUTH);
+                main_output[3]=checkCardinals(headings,topData,bottomData,blockDiff,WEST);
+                
+                
+                return output_blocks;
+        }
+        
+        //called by processData
+        private ArrayList<ArrayList<Integer>> SectionData(ArrayList<Double> headings,ArrayList<Double> bottomData){
+                //to output
+                ArrayList<Integer> startIndexes = new ArrayList<Integer>();
+                ArrayList<Integer> endIndexes = new ArrayList<Integer>();
+                ArrayList<ArrayList<Integer>> output = new ArrayList<ArrayList<Integer>>();
+                
+                //method vars
+                int currStartIndex=0;
+                boolean inSection=false;
+                
+                
+                //section using bottomData
+                for(int i=0;i<bottomData.size();i++){
+                        //start sectioning if not in a section already and dist drops below threshold
+                        if(!inSection&&bottomData.get(i)<=SCAN_DIST_THRESH){
+                                currStartIndex=i;
+                                inSection=true;
+                                
+                                //RConsole.println("----------start-----------");
+                        }
+                        
+                       // RConsole.println(""+bottomData.get(i));
+                        
+                        //if in sectioning and breaks above band with enough points then end section, or if too many indexes have passed
+                        if((((inSection&&bottomData.get(i)>=(SCAN_DIST_THRESH+SCAN_DIST_BAND))&&(i-currStartIndex)>=BLOCK_COUNT_MIN))||(inSection&&(i-currStartIndex)>BLOCK_COUNT_THRESH)){
+                                //store
+                                startIndexes.add(currStartIndex);
+                                endIndexes.add(i-1);
+                                
+                                //reset
+                                currStartIndex=i;
+                                inSection=false;
+                                
+                                //RConsole.println("-----------end-----------");
+                        }
+                        
+                }
+                //section off last section
+                if(inSection&&(bottomData.size()-currStartIndex)>=BLOCK_COUNT_MIN){
+                        startIndexes.add(currStartIndex);
+                        endIndexes.add(bottomData.size()-1);
+                }
+                
+               /*RConsole.print("\n start indexes: " );
+                for(int i=0;i<startIndexes.size();i++)
+                        //RConsole.print(" "+startIndexes.get(i));
+                
+               RConsole.print("\n end indexes: " );
+                for(int i=0;i<endIndexes.size();i++)
+                        RConsole.print(" "+endIndexes.get(i));
+                RConsole.print("\n");*/
+                
+                
+                output.add(startIndexes);
+                output.add(endIndexes);
+                return output;
+        }
+        
+        
+        //called by processScanData - in array a 1 is a Blue Block, a 0 is not
+        //probably need to test this individually
+        private ArrayList<Integer> blockDifferentiate(ArrayList<Double> topData,ArrayList<Double> bottomData){
+                ArrayList<Integer> diffOutput = new ArrayList<Integer>();
+                
+                for(int i=0; i<bottomData.size();i++){
+                        if((topData.get(i)-bottomData.get(i))>DIFFERENTIATE_DIFF&&bottomData.get(i)<=DIFFERENTIATE_RANGE){
+                                diffOutput.add(1);
+                                //RConsole.print("1 ");
+                        }else{
+                                diffOutput.add(0);
+                                //RConsole.print("0 ");
+                        }
+                }
+                //RConsole.println("");
+                
+                return diffOutput;
+        }
+        
+        //called by processScanData
+        public static double getListAvg(ArrayList<Integer> input,int start, int end){
+                double output=0,count=0;
+                //Section to differentiate
+                
+                //RConsole.println("avgerage for s: "+start+" e: "+end+" ");
+                for(int i=start;i<=end;i++){
+                        //RConsole.print(""+input.get(i));
+                        output+=input.get(i);
+                        count++;
+                }
+                //RConsole.println("\n");
+                
+                return output/(count);
+        }
+        
+        //called by scan
+        /**
+         * Returns 1 if blocked, 0 if free
+         * @param angle
+         * @param cardinal
+         * @return
+         */
+        private int checkCardinals(ArrayList<Double> headings,ArrayList<Double> topData, ArrayList<Double> bottomData, ArrayList<Integer> blockDiff,double cardinal){
+                int diff_count=0;
+                double diff_sum=0;
+                int num_wood=0;
+                
+                
+                for(int i=0;i<bottomData.size();i++){
+                        //if within angle error and close enough then add data
+                        if(Math.abs(headings.get(i)-cardinal)<POINT_BLOCKED_ERROR&&bottomData.get(i)<POINT_BLOCKED_DIST&&Math.abs(bottomData.get(i)-topData.get(i))<DIFFERENTIATE_DIFF){
+                                diff_count++;
+                                diff_sum+=blockDiff.get(i);
+                                if(blockDiff.get(i)==0)
+                                        num_wood++;
+                                //RConsole.println("head: "+headings.get(i)+" type: "+blockDiff.get(i));
+                        }
+                }
+                
+                //avoids division by zero
+                //return 1 if avg low enough and point blocked
+                if(diff_count!=0)
+                        //RConsole.println("CARDINAL: "+cardinal+" type: "+(diff_sum/diff_count)+ " num wood: "+num_wood);
+                        if((diff_sum/diff_count)<REQ_WOOD_CERT&&num_wood>=WOOD_COUNT_MIN)
+                                return 1;
+                
+                return 0;
+                
+        }
+        
+    /**
+     * 
+     * @param goes straight
+     */
+    public void GrabBlock(){
+            double pushBlockDist=25;
+            double blockLeeway=15; //must be smaller than pushblockdist
+            
+            //increase recursion
+            recursion_count+=1;
+            
+            //raise claw to void interference with bottom US sensor
+            robo.setClawAcc(CLAW_RAISE_ACC);
+            robo.setclawSpeed(CLAW_RAISE_ACC);
+            robo.rotateClawAbsolute(CLAW_RAISE_ANGLE);
+            
+            //get initial block distance
+            robo.setForwardSpeed(100);
+            
+            //move back
+            nav.travelSetDistanceBackwards(DEFAULT_GRAB_DISTANCE);
+                    
+            
+            //lower claw
+            robo.rotateClawAbsolute(CLAW_LOWER_ANGLE);
 
-	public static final double DEFAULT_GRAB_DISTANCE = 13.5; //CM. Distance from wheel axle to closest part of block when block is pushed agains the robot.
-	
-	public final double SCAN_ROTATE_THRESH=4.0; //slightly greater than TURNTO_THRESHOLD in navigation
-	public final double SCAN_DIST_THRESH=26; //70
-	public final double SCAN_DIST_ERROR=5;
-	public final int SCAN_ROTATE_SPEED=50;
-	public final int BLOCK_COUNT_THRESH=10;//20 //3 @70
-	private final int BLOCK_MAX=20; //20 @70
-	private int ANGLE_OFFSET = 3;//4
-	
-	public final int CLAW_RAISE_ANGLE=85;
-	public final int CLAW_RAISE_SPEED=250;
-	public final int CLAW_RAISE_ACC=150;
-	public final int CLAW_LOWER_ANGLE=-55;
-	public final int CLAW_LOWER_SPEED=50;
-	public final int CLAW_LOWER_ACC=80;
-	
-	//check scan point - assign cardinal directions
-	public final double NORTH;
-	public final double SOUTH;
-	public final double EAST;
-	public final double WEST;
-	public final double POINT_BLOCKED_ERROR=25; //angle
-	public final double POINT_BLOCKED_DIST=56;
-	public final double POINT_BLOCKED_CHECK_DIST=POINT_BLOCKED_DIST+5;
-	
-	private TwoWheeledRobot robo;
-	private Navigation nav;
-	private Odometer odo;
-	private BlockDifferentiator block_diff;
-	
-	
-	public Search(TwoWheeledRobot robo,Navigation nav,Odometer odo,BlockDifferentiator block_diff){
-		this.robo=robo;
-		this.nav=nav;
-		this.odo=odo;
-		this.block_diff=block_diff;
-		
-		//assign cardinal directions
-		this.NORTH=nav.NORTH;
-		this.EAST=nav.EAST;
-		this.SOUTH=nav.SOUTH;
-		this.WEST=nav.WEST;
-	}
-	
-	/**
-	 * output:
-	 * 0: NORTH scan point (0 if clear) (1 if blocked)
-	 * 1: EAST scan point (0 if clear) (1 if blocked)
-	 * 2: SOUTH scan point (0 if clear) (1 if blocked)
-	 * 3: WEST scan point (0 if clear) (1 if blocked)
-	 * 4: found block? (0 if no) (1 if yes)
-	 */
-	public int[] Scan(){
-		double goalAngle=odo.getTheta()+150;
-		double currScanDist,avgAngle;
-		boolean onBlock=false;
-		double BlockBeginning=0, BlockEnd,savedAngle;
-		int blockType,blockCount=0;
-		boolean atGoal=false;
-		int[] result_output={0,0,0,0,0};
-		int currAng;
-		
-		//handle boundary cases
-		if(goalAngle>360){
-			goalAngle-=360;
-		}
-		
-		robo.setRotationSpeed(SCAN_ROTATE_SPEED);
-		robo.rotateClockwise();
-		Sound.beep();
-		while(!atGoal||blockCount!=0){ //rotate until goal passed and blockCount=0
-			
-			if(Math.abs(odo.getTheta()-goalAngle)<SCAN_ROTATE_THRESH){ //at goal
-				atGoal=true;
-			}
-			
-			currScanDist=robo.scanWithBottomsensor(5);//get distance
-			
-			RConsole.println("S: "+currScanDist+"    "+blockCount);
-			
-			currAng=(int)odo.getTheta()+3;
-			
-			if(currAng>=360){
-				currAng-=360;
-			}
-			
-			//check if a scan point is blocked
-			if(Math.abs(currAng-NORTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[0]==0){
-				result_output[0]=currAng;
-				if(result_output[0]==0){
-					result_output[0]+=1;
-				}
-			}
-			if(Math.abs(currAng-EAST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[1]==0){
-				result_output[1]=currAng;
-				if(result_output[1]==0){
-					result_output[1]+=1;
-				}
-			}
-			if(Math.abs(currAng-SOUTH)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[2]==0){
-				result_output[2]=currAng;
-				if(result_output[2]==0){
-					result_output[2]+=1;
-				}
-			}
-			if(Math.abs(currAng-WEST)<POINT_BLOCKED_ERROR&&currScanDist<POINT_BLOCKED_DIST&&result_output[3]==0){
-				result_output[3]=currAng;
-				if(result_output[3]==0){
-					result_output[3]+=1;
-				}
-			}
-		
-			//check for blocks
-			if((onBlock&&currScanDist>SCAN_DIST_THRESH&&blockCount>BLOCK_COUNT_THRESH)||blockCount>BLOCK_MAX){ //end of block
-				onBlock=false;	//end of block reached
-				blockCount=0;	//reset block count
-				BlockEnd=odo.getTheta(); //store block end angle, accountts for sensor eye offset (might have to readd -5)
-				Sound.buzz();
-				
-				//stop rotation
-				robo.stopMotors();
-				//stop poller
-
-				//turn to middle of block
-				if(BlockBeginning>=270 && BlockEnd<=90)
-					{
-						avgAngle = ((BlockBeginning+BlockEnd)/2)+180;
-						if(avgAngle>360)
-							avgAngle-=360;
-					
-					}
-				else{
-				avgAngle=(BlockBeginning+BlockEnd)/2;
-				
-				}
-				savedAngle=odo.getTheta(); //save angle
-				nav.turnTo(avgAngle-ANGLE_OFFSET,true);
-				blockType=block_diff.identifyBlock(SCAN_DIST_THRESH*1.5); //changed distance to 25,added start and stop to poller
-				if(blockType==1){
-					Sound.beepSequenceUp();
-					GrabBlock();
-					result_output[4]=1;
-					break;
-				}else{
-					Sound.buzz();
-				}
-				
-				//turn back to previous angle to avoid redetection
-				nav.turnTo(savedAngle, true);
-				
-				//start poller again
-				robo.startUsBottom();
-				robo.setRotationSpeed(SCAN_ROTATE_SPEED);
-				robo.rotateClockwise();
-			}
-			else if(!onBlock&&currScanDist<=SCAN_DIST_THRESH){ //start block
-				onBlock=true;//detected a block
-				BlockBeginning=odo.getTheta(); //store block start angle
-				Sound.beep();
-				
-			}
-			else if(onBlock){//&&(Math.abs(currScanDist-SCAN_DIST_THRESH)<SCAN_DIST_ERROR||currScanDist<=SCAN_DIST_THRESH)){ //on block
-				blockCount++;
-			}
-			
-			//RConsole.println(""+currScanDist+"      "+blockCount);
-		}
-		robo.stopBottomUsPoller(); //stop polling
-		//RConsole.open();
-		
-		//double check
-		if(result_output[0]!=0){
-			//check north
-			result_output[0]=checkCardinal(result_output[0]);
-		}
-		if(result_output[1]!=0){
-			//check east
-			result_output[1]=checkCardinal(result_output[1]);
-		}
-		if(result_output[2]!=0){
-			//check south
-			result_output[2]=checkCardinal(result_output[2]);
-		}
-		if(result_output[3]!=0){
-			//check west
-			result_output[3]=checkCardinal(result_output[3]);
-		}
-		
-		return result_output;
-	}
-	
-	private int checkCardinal(double input){
-		nav.turnTo(input,true);
-		if(block_diff.identifyBlock(POINT_BLOCKED_CHECK_DIST)==1){
-			return 0;
-		}
-		return 1;
-	}
-	
-	/**
-	 * 
-	 * @param goes straight
-	 */
-	public void GrabBlock(){
-		double pushBlockDist=25;
-		double blockLeeway=15; //must be smaller than pushblockdist
-		double blockDist;
-		double currX,currY;
-		
-		//raise claw to void interference with bottom US sensor
-		robo.setClawAcc(CLAW_RAISE_ACC);
-		robo.setclawSpeed(CLAW_RAISE_ACC);
-		robo.rotateClawAbsolute(CLAW_RAISE_ANGLE);
-		
-		//get initial block distance
-		blockDist=robo.scanWithBottomsensor(10);
-		robo.setForwardSpeed(100);
-		
-		
-		//too close
-		//if(blockDist<=DEFAULT_GRAB_DISTANCE+blockLeeway){
-			nav.travelSetDistanceBackwards(DEFAULT_GRAB_DISTANCE);
-			
-			
-			/*while(blockDist<DEFAULT_GRAB_DISTANCE+blockLeeway){
-				blockDist=robo.scanWithBottomsensor(15);
-				robo.goBackward();*/
-			//}
-			//robo.stopMotors();
-		//}
-		
-		//too far
-		/*else if(blockDist>DEFAULT_GRAB_DISTANCE+blockLeeway){
-			robo.goForward();
-			while(blockDist>DEFAULT_GRAB_DISTANCE+blockLeeway){
-				blockDist=robo.scanWithBottomsensor(5);
-				robo.goForward();
-			}
-			robo.stopMotors();
-		}*/
-		
-		//lower claw
-		robo.rotateClawAbsolute(CLAW_LOWER_ANGLE);
-
-		//push block
-		nav.travelSetDistanceStraight(pushBlockDist);
-		
-		//raise claw and grab block
-		robo.rotateClawAbsolute(CLAW_RAISE_ANGLE);
-		robo.stopClaw();
-		double temp=robo.scanWithBottomsensor(5);
-		if(temp<DEFAULT_GRAB_DISTANCE+blockLeeway)
-		{
-			RConsole.println("RECUSRION GRAB "+temp);
-			GrabBlock();
-		}
-		
-		
-		
-		//robo.rotateClawAbsolute(CLAW_LOWER_ANGLE);
-	}
-	
+            //push block
+            nav.travelSetDistanceStraight(pushBlockDist);
+            
+            //raise claw and grab block
+            robo.rotateClawAbsolute(CLAW_RAISE_ANGLE);
+            robo.stopClaw();
+            double temp=robo.scanWithBottomsensor(5);
+            if(temp<(DEFAULT_GRAB_DISTANCE+blockLeeway)&&recursion_count<=CLAW_RECUR_LIM)
+            {
+                    //RConsole.println("RECUSRION GRAB "+temp);
+                    GrabBlock();
+            }            
+            
+            //robo.rotateClawAbsolute(CLAW_LOWER_ANGLE);
+    }
 }

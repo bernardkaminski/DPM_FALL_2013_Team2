@@ -3,6 +3,7 @@ import Hardware.*;
 import MainLogic.*;
 import IntermediateLogic.*;
 import lejos.nxt.*;
+import lejos.nxt.comm.RConsole;
 import bluetooth.*;
 import java.util.ArrayList;
 
@@ -75,22 +76,29 @@ public class PathTest {
 			ArrayList<Integer> xCords = new ArrayList<Integer>();
 			ArrayList<Integer> yCords = new ArrayList<Integer>();
 			int [] scanResults = new int[5];
-			
+			RConsole.openAny(20000);
 			Button.waitForAnyPress();		
 			
 			//generate initial path to desired zone
-			generatePath(0,0,(int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(), xCords, yCords);	
-			
+			generatePath(0,0,(int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(), xCords, yCords,true);	
+			for(int k=0;k<xCords.size();k++){
+			RConsole.println(""+xCords.get(k)+", ");
+			}
+			for(int k=0;k<xCords.size();k++){
+				RConsole.println(""+yCords.get(k)+", ");
+				}
+			//Lift claw
+			robo.rotateClawAbsolute(80);
 			//Travel to green zone while looking for blocks
 			boolean hasBlock=false;
 			for(int i=0;i<xCords.size();i++){				
 				nav.travelTo(true, false,xCords.get(i),yCords.get(i));
-				nav.turnTo(270, true);
-				scanResults = search.Scan(hasBlock);
+				//nav.turnTo(270, true);
+				/*scanResults = search.Scan(hasBlock);
 				if(scanResults[4]==1){
 					hasBlock=true;
 				}
-				processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone);
+				processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone);*/
 				
 			}
 			robo.stopMotors();
@@ -105,7 +113,13 @@ public class PathTest {
 			
 			//Generate new path to next "green zone" (point chosen to ensure that robot covers previously uncovered ground
 			//just back to origin for testing
-			generatePath((int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(),0,0, xCords, yCords);
+			generatePath((int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(),0,0, xCords, yCords,false);
+			for(int k=0;k<xCords.size();k++){
+				RConsole.println(""+xCords.get(k)+", ");
+				}
+			for(int k=0;k<xCords.size();k++){
+				RConsole.println(""+yCords.get(k)+", ");
+				}
 			for(int i=0;i<xCords.size();i++){				
 				nav.travelTo(true, false,xCords.get(i),yCords.get(i));
 				nav.turnTo(90, true); //now travelling south so want to turn to 90 instead of 270 for scans
@@ -113,7 +127,7 @@ public class PathTest {
 				if(scanResults[4]==1){
 					hasBlock=true;
 					//Go back to green zone to stack
-					generatePath(xCords.get(i),yCords.get(i), (int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(), xCords, yCords);
+					generatePath(xCords.get(i),yCords.get(i), (int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(), xCords, yCords,true);
 					for(int j=0;j<xCords.size();j++){				
 						nav.travelTo(true, false,xCords.get(j),yCords.get(j));
 						nav.turnTo(270, true);
@@ -121,20 +135,20 @@ public class PathTest {
 						if(scanResults[4]==1){
 							hasBlock=true;
 						}
-						processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone);
+						processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone,false);
 						
 						}
 						robo.stopMotors();
 						//Back in green zone with second block, ready to stack
 				}
-				processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone);				
+				processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone,true);				
 			}
 			
 	
 		}
 	
 
-	public static void generatePath( int xStart, int yStart, int xZone,int yZone,ArrayList<Integer>xCords, ArrayList<Integer>yCords)
+	public static void generatePath( int xStart, int yStart, int xZone,int yZone,ArrayList<Integer>xCords, ArrayList<Integer>yCords, boolean up)
 	{	
 		//Remove all points
 		for(int i=0;i<xCords.size();i++){
@@ -153,13 +167,20 @@ public class PathTest {
 				xCords.remove(0);
 				yCords.remove(0);
 				xCords.add(i,xStart);
-				yCords.add(i,yStart+30);			
+				if(up){
+				yCords.add(i,yStart+30);}
+				yCords.add(i,yStart-30);
 			}
 			else
 			{
 				
 				if((i%2)==0)
 				{	
+					if(yStart>yZone)
+					{
+						xCords.add(xCords.get(i-1));
+						yCords.add(yCords.get(i-1)-30);				
+					}
 						xCords.add(xCords.get(i-1));
 						yCords.add(yCords.get(i-1)+30);				
 						
@@ -178,7 +199,7 @@ public class PathTest {
 			
 				
 			}
-			
+			if(up){
 			if(xCords.get(i)>xZone)
 			{
 				yCords.remove(i);
@@ -206,37 +227,68 @@ public class PathTest {
 				}
 				break;
 			}
+			}
+			else{
+				if(xCords.get(i)<xZone)
+				{
+					yCords.remove(i);
+					xCords.remove(i);
+					int j=i;
+					while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone)){
+						xCords.add(xZone);
+						yCords.add(yCords.get(j-1)-30);	
+						j++;
+					}
+					break;
+				}
+				if(yCords.get(i)<yZone)
+				{
+					
+					yCords.remove(i);
+					xCords.remove(i);
+					int j=i;
+					while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone)){
+						
+						yCords.add(yZone);
+						
+						xCords.add(xCords.get(j-1)-30);	
+						j++;
+					}
+					break;
+				}
+			}
 		 i++;
 		}
 	}
 
 	//still needs to add in red zone as an obstacle
-public static void processData(int[]scanResults,ArrayList<Integer>xCords, ArrayList<Integer>yCords, int i, Navigation nav, Point badZoneBL, Point badZoneBR){	
+public static void processData(int[]scanResults,ArrayList<Integer>xCords, ArrayList<Integer>yCords, int i, Navigation nav, Point badZoneBL, Point badZoneBR, boolean up){	
 	
 	//North blocked and next point is north
 	if(scanResults[0]==1&&yCords.get(i+1)>yCords.get(i)){
 		//West travelling zig zag
 		if(xCords.get(i+2)<xCords.get(i)){
 			nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
-			generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);	
+			generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords,up);	
 		}
 		//East travelling zig zag
 		nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i));
-		generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+		generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords,up);
 				
 	}
 	
 	//East blocks and next point east
 	if(scanResults[1]==1&&xCords.get(i+1)>xCords.get(i)){
 		nav.travelTo(true, false, xCords.get(i),yCords.get(i)+30);
-		generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+		generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords,up);
+		
 
 	}
 	
 	//West blocked and next point west
 	if(scanResults[2]==1&&xCords.get(i+1)<xCords.get(i)){	
 		nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
-		generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+		generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords, up);
 	
 	}
 	
@@ -245,11 +297,11 @@ public static void processData(int[]scanResults,ArrayList<Integer>xCords, ArrayL
 		//West travelling zig zag
 		if(xCords.get(i+2)>xCords.get(i)){
 			nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
-			generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);	
+			generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords,up);	
 		}
 		//East travelling zig zag
 		nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i));
-		generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+		generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords,up);
 				
 	}
 
@@ -300,4 +352,73 @@ public static void convertMap(int[] greenZone,int[] redZone,int startingCorner){
 		redZone[3]=x2Red;
 	}
 }
+
+
+public static void stack(TwoWheeledRobot robo, Navigation nav,Search search)
+{
+        int LINE_LIGHTVALUE_MAX=515;
+        int LINE_LIGHTVALUE_MIN=400;
+        int SLOW =75; 
+        robo.setForwardSpeed((int)(SLOW*1.5));
+        robo.stopMotors();    
+        int leftLightValue=robo.getLeftLightValue();
+        int rightLightValue=robo.getRightLightValue();      
+        nav.turnTo(45, true);
+         while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
+         {               
+                 robo.startLeftMotor();   
+                 leftLightValue=robo.getLeftLightValue();
+         }
+            
+         robo.stopLeftMotor();
+         
+         while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
+         {               
+                 robo.startRightMotor();
+                 rightLightValue=robo.getRightLightValue();    
+         }
+        
+         robo.stopRightMotor();
+         robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+         nav.travelSetDistanceBackwards(10);
+         nav.turnTo(0, true);
+         nav.fineTune();
+ 
+
+        
+}
+
+public static void drop(TwoWheeledRobot robo, Navigation nav, Search search)
+{
+        int LINE_LIGHTVALUE_MAX=515;
+    int LINE_LIGHTVALUE_MIN=400;
+    int SLOW =75; 
+        robo.setForwardSpeed((int)(SLOW*1.5));
+    robo.stopMotors();    
+    int leftLightValue=robo.getLeftLightValue();
+    int rightLightValue=robo.getRightLightValue();      
+    nav.turnTo(45, true);
+     while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
+     {               
+             robo.startLeftMotor();   
+             leftLightValue=robo.getLeftLightValue();
+         }
+            
+         robo.stopLeftMotor();
+         
+         while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
+         {               
+                 robo.startRightMotor();
+                 rightLightValue=robo.getRightLightValue();    
+         }
+        
+         robo.stopRightMotor();
+         robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+         nav.travelSetDistanceBackwards(10);
+         nav.turnTo(0, true);
+         nav.fineTune();
+         
+         
+        }
+
 }
