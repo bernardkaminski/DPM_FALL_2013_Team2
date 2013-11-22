@@ -7,6 +7,8 @@ import lejos.nxt.comm.RConsole;
 import bluetooth.*;
 import java.util.ArrayList;
 
+import javax.microedition.sensor.HeadingChannelInfo;
+
 import bluetooth.BluetoothConnection;
 import bluetooth.Transmission;
 public class PathTest {
@@ -79,6 +81,11 @@ public class PathTest {
 			RConsole.openAny(20000);
 			Button.waitForAnyPress();		
 			
+			//variable to remember where first block was placed
+			double stackHeading;
+			double xStack;
+			double yStack;
+			
 			//generate initial path to desired zone
 			generatePath(0,0,(int)BottomLeftGreenZone.getx(), (int)BottomLeftGreenZone.gety(), xCords, yCords,true);	
 			for(int k=0;k<xCords.size();k++){
@@ -107,7 +114,11 @@ public class PathTest {
 			if(hasBlock){
 				//Drop block
 				nav.turnTo(45, true);
-				robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+				drop(robo,nav);
+				//robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+				stackHeading = odo.getTheta();
+				xStack= odo.getX();
+				yStack= odo.getY();
 				hasBlock=false;
 				}
 			
@@ -139,6 +150,7 @@ public class PathTest {
 						
 						}
 						robo.stopMotors();
+						stack(robo,nav);
 						//Back in green zone with second block, ready to stack
 				}
 				processData(scanResults, xCords,yCords,i,nav,BottomLeftRedZone,TopRightRedZone,true);				
@@ -353,6 +365,7 @@ public static void convertMap(int[] greenZone,int[] redZone,int startingCorner){
 	}
 }
 
+<<<<<<< HEAD
 
 public static void stack(TwoWheeledRobot robo, Navigation nav,Search search)
 {
@@ -394,12 +407,55 @@ public static void drop(TwoWheeledRobot robo, Navigation nav, Search search)
     int LINE_LIGHTVALUE_MIN=400;
     int SLOW =75; 
         robo.setForwardSpeed((int)(SLOW*1.5));
+=======
+public static void stack(TwoWheeledRobot robo, Navigation nav)
+{
+	int LINE_LIGHTVALUE_MAX=515;
+	int LINE_LIGHTVALUE_MIN=400;
+	int SLOW =75; 
+	robo.setForwardSpeed((int)(SLOW*1.5));
+	robo.stopMotors();    
+	int leftLightValue=robo.getLeftLightValue();
+	int rightLightValue=robo.getRightLightValue();      
+	nav.turnTo(45, true);
+	 while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
+	 {               
+		 robo.startLeftMotor();   
+		 leftLightValue=robo.getLeftLightValue();
+	 }
+	    
+	 robo.stopLeftMotor();
+	 
+	 while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
+	 {               
+		 robo.startRightMotor();
+		 rightLightValue=robo.getRightLightValue();    
+	 }
+	
+	 robo.stopRightMotor();
+	 robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+	 nav.travelSetDistanceBackwards(10);
+	 nav.turnTo(0, true);
+	 nav.fineTune();
+ 
+
+	
+}
+
+public static void drop(TwoWheeledRobot robo, Navigation nav)
+{
+	int LINE_LIGHTVALUE_MAX=515;
+    int LINE_LIGHTVALUE_MIN=400;
+    int SLOW =75; 
+	robo.setForwardSpeed((int)(SLOW*1.5));
+>>>>>>> 95e36f62f208cd2c885b5924c00fa7cc37f0d876
     robo.stopMotors();    
     int leftLightValue=robo.getLeftLightValue();
     int rightLightValue=robo.getRightLightValue();      
     nav.turnTo(45, true);
      while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
      {               
+<<<<<<< HEAD
              robo.startLeftMotor();   
              leftLightValue=robo.getLeftLightValue();
          }
@@ -422,3 +478,27 @@ public static void drop(TwoWheeledRobot robo, Navigation nav, Search search)
         }
 
 }
+=======
+    	 robo.startLeftMotor();   
+    	 leftLightValue=robo.getLeftLightValue();
+	 }
+	    
+	 robo.stopLeftMotor();
+	 
+	 while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
+	 {               
+		 robo.startRightMotor();
+		 rightLightValue=robo.getRightLightValue();    
+	 }
+	
+	 robo.stopRightMotor();
+	 robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+	 nav.travelSetDistanceBackwards(10);
+	 nav.turnTo(0, true);
+	 nav.fineTune();
+	 
+	 
+	}
+
+}
+>>>>>>> 95e36f62f208cd2c885b5924c00fa7cc37f0d876
