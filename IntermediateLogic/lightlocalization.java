@@ -15,6 +15,9 @@ public class lightlocalization {
     private final int LINE_LIGHTVALUE_MIN=400;  
     private int leftLightValue;
     private int rightLightValue;
+    int OFFSET= 8;
+    int SLOW = 30;
+    int STANDARD = 80;
     
     int minChangeToIndicateLine = 12;
     int maxChangeToIndicateLine = 150;
@@ -52,37 +55,43 @@ public class lightlocalization {
 		robo.setRotationSpeed(80);
 		
 		if((usScannerFirstLine<35)&&(usScannerSecondLine>40)){			
-			robo.startRightMotor();
-			getLightValue(1);
+			//robo.startRightMotor();
+			//getLightValue(1);
 			odo.setPosition(new double [] {0.0,0.0,0.0}, new boolean [] {true, true, true});
 			RConsole.println(usScannerFirstLine+" " + usScannerSecondLine+ "third quadrant");
 		}
 		
 		if((usScannerFirstLine>40)&&(usScannerSecondLine>40)){			
-			robo.startRightMotor();
-			getLightValue(1);
+			//robo.startRightMotor();
+			//getLightValue(1);
 			odo.setPosition(new double [] {0.0,0.0,90.0}, new boolean [] {true, true, true});
 			RConsole.println(usScannerFirstLine+" " + usScannerSecondLine+ "second quadrant");
 		}
 		
 		if((usScannerFirstLine>40)&&(usScannerSecondLine<35)){			
-			robo.startRightMotorback();
-			getLightValue(1);
+			//robo.startRightMotorback();
+			//getLightValue(1);
 			odo.setPosition(new double [] {0.0,0.0,180.0}, new boolean [] {true, true, true});
 			RConsole.println(usScannerFirstLine+" " + usScannerSecondLine+ "first quadrant");
 		}
 		
 		if((usScannerFirstLine<35)&&(usScannerSecondLine<35)){			
-			robo.startRightMotorback();
-			getLightValue(1);
+			//robo.startRightMotorback();
+			//getLightValue(1);
 			odo.setPosition(new double [] {0.0,0.0,270.0}, new boolean [] {true, true, true});
 			RConsole.println(usScannerFirstLine+" " + usScannerSecondLine+ "fourth quadrant");
 		}
 		
-		robo.setRotationSpeed(80);
+		robo.setRotationSpeed(STANDARD);
 		nav.turnTo(0, true);
-		nav.travelSetDistanceBackwards(2);
+		nav.travelSetDistanceBackwards(4);
 		nav.fineTune();
+		odo.setPosition(new double [] {0.0,0.0,0.0}, new boolean [] {true, true, true});
+		nav.turnTo(OFFSET, true);
+		odo.setPosition(new double [] {0.0,0.0,0.0}, new boolean [] {true, true, true});
+		//nav.turnTo(OFFSET, true);
+		//odo.setPosition(new double [] {0.0,0.0,0.0}, new boolean [] {true, true, true});
+		
 	}
 	
 	public boolean getLightValue(int numberofmotors){
@@ -93,7 +102,6 @@ public class lightlocalization {
 		robo.rotateClockwise();
 		while (true) 
 			{
-				RConsole.println(""+robo.getLeftLightValue());
 				changeInLightValue = lightValue - robo.getLeftLightValue();
 				lightValue = robo.getLeftLightValue();
 				if((Math.abs(changeInLightValue) > minChangeToIndicateLine)&&(Math.abs(changeInLightValue) < maxChangeToIndicateLine)&&(lightValue<520))// this senses the change in colour on the floor . therefore for each line it senses two changes entering and exiting
@@ -115,31 +123,20 @@ public class lightlocalization {
 		}
 		else if(numberofmotors==1){
 			
-			while (true) 
-			{
-				RConsole.println(""+robo.getLeftLightValue());
-				changeInLightValue = lightValue - robo.getRightLightValue();
-				lightValue = robo.getRightLightValue();
-				if((Math.abs(changeInLightValue) > minChangeToIndicateLine)&&(Math.abs(changeInLightValue) < maxChangeToIndicateLine)&&(lightValue<570))// this senses the change in colour on the floor . therefore for each line it senses two changes entering and exiting
-				{
-					RConsole.println(changeInLightValue+" "+lightValue );
-					lineCounter++;//increment the amount of times a change in color has been sensed 
-					//in order to hear if the sensor sensed the line
-						if (lineCounter==1)//exiting first line
-						{
-							Sound.beep();
-							RConsole.println(robo.getLeftLightValue()+" "+robo.getRightLightValue() );
-							robo.stopMotors();
-							return true;
-						}
+			while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN)){               
+			    robo.startLeftMotor();   
+			    leftLightValue=robo.getLeftLightValue();
+			    }					
+				Sound.beep();
+				RConsole.println(robo.getLeftLightValue()+" "+robo.getRightLightValue() );
+			    robo.stopMotors();
+				return true;
+						
 						
 				}
 				
-			}
-			
-		}
-		
-		return false;
+			return false;
+				
 	}
 	
 }
