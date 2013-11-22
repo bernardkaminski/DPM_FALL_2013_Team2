@@ -174,10 +174,23 @@ public class TwoWheeledRobot {
         	leftMotor.setSpeed(forwardSpeed);
         	leftMotor.forward();
         }
+        
         public void startRightMotor()
         {	
         	rightMotor.setSpeed(forwardSpeed);
         	rightMotor.forward();
+        }
+        
+        public void startLeftMotorback()
+        {	
+        	leftMotor.setSpeed(forwardSpeed);
+        	leftMotor.backward();
+        }
+        
+        public void startRightMotorback()
+        {	
+        	rightMotor.setSpeed(forwardSpeed);
+        	rightMotor.backward();
         }
         /**
          * stops the robots motors that control movement 
