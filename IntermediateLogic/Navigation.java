@@ -5,7 +5,7 @@ import lejos.nxt.*;
 
 import Hardware.TwoWheeledRobot;
 import lejos.nxt.Button;
-import lejos.nxt.comm.RConsole;
+import lejos.nxt.comm.*;
 
 /**
 * the class that allows the robot to move tospecific locations. this class also corrects the odometer while traveling to locations.
@@ -64,17 +64,17 @@ public class Navigation {
          * @param y the y coordinate to travel to
          */
         public void travelTo(boolean correct ,boolean hasBlock, double x, double y){
-        	//RConsole.println("T:"+x+"   "+y);
+        	//Rconsole.println("T:"+x+"   "+y);
                 if(hasBlock)
                 {
-                //RConsole.println("hasblock entered");
+                //Rconsole.println("hasblock entered");
                 //robo.startUsBottom();
                 robo.setForwardSpeed(50);
                 while(keepGoing(odo.getX(), odo.getY(), x, y))
                      {
-                //RConsole.println(robo.getBottomUsPollerDistance()+" ");
+                ////Rconsole.println(robo.getBottomUsPollerDistance()+" ");
                 if(robo.scanWithTopsensor(2)<DETECT_DISTANCE){
-                //RConsole.print("40 detected");
+                //Rconsole.print("40 detected");
                     robo.stopMotors();
                     double head =odo.getTheta()+90;
                     if(head>=360)
@@ -104,7 +104,7 @@ public class Navigation {
                          robo.goForward();
                         /* if(Math.abs(thetaCorrection) > SMOOTH_THETA_CORRECTION_THRESHOLD && Math.abs(thetaCorrection)<TRAVELTO_TURN_THRESHOLD)
                          {
-                         RConsole.println("minang:"+minAng);
+                         //Rconsole.println("minang:"+minAng);
                          smoothThetaCorection(minAng);
                          robo.setForwardSpeed(FAST);
                              robo.goForward();
@@ -123,11 +123,11 @@ public class Navigation {
                 }
                
                 else{  
-                //RConsole.println("hasblock not entered");
+                //Rconsole.println("hasblock not entered");
 
                         while(keepGoing(odo.getX(), odo.getY(), x, y))
                         {
-                        //RConsole.println("keepgoing without hasblock");
+                        //Rconsole.println("keepgoing without hasblock");
                  
                     double minAng = (Math.atan2((x - odo.getX()), (y - odo.getY()))) * (180.0 / Math.PI);
                             if (minAng < 0) minAng += 359.0; //correct heading
@@ -141,7 +141,7 @@ public class Navigation {
                             robo.goForward();
                            /* if(Math.abs(thetaCorrection) > SMOOTH_THETA_CORRECTION_THRESHOLD && Math.abs(thetaCorrection)<TRAVELTO_TURN_THRESHOLD)
                             {
-                            RConsole.println("minang:"+minAng);
+                            //Rconsole.println("minang:"+minAng);
                             smoothThetaCorection(minAng);
                             robo.setForwardSpeed(FAST);
                                 robo.goForward();
@@ -210,16 +210,16 @@ public class Navigation {
     }
        
     robo.stopLeftMotor();
-    RConsole.println("On left line");
+    //Rconsole.println("On left line");
     while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN)){               
     robo.startRightMotor();
             rightLightValue=robo.getRightLightValue();    
     }
    
     robo.stopRightMotor();
-    RConsole.println("On right line");
+    //Rconsole.println("On right line");
         String heading=getCardinalHeading();
-        RConsole.println("H:"+heading);
+        //Rconsole.println("H:"+heading);
         correctOdometer(heading);
        
         }

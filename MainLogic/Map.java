@@ -79,7 +79,15 @@ public class Map {
 	{
 		return false;
 	}
-	
+	public boolean isInDeadZone(int x, int y)
+	{
+		if (x>=deadZone[0].getx()&&x<=deadZone[1].getx()&&y>=deadZone[0].gety() && y<=deadZone[1].gety())
+		{
+			return true;
+		}
+		else
+			return false;
+	}
 	public Point getDropZoneCenter()
 	{
 		Point p = new Point((dropZone[1].getx()-dropZone[0].getx())/2,(dropZone[1].gety()-dropZone[0].gety())/2 );

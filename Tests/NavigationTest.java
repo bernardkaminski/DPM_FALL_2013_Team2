@@ -7,10 +7,9 @@ import Hardware.UltrasonicPoller;
 import Hardware.UltrasonicScanner;
 import IntermediateLogic.BlockDifferentiator;
 import IntermediateLogic.LcdDisplay;
-import IntermediateLogic.Localizer;
-import IntermediateLogic.LocalizerBernie;
 import IntermediateLogic.Navigation;
 import IntermediateLogic.Odometer;
+import IntermediateLogic.lightlocalization;
 import MainLogic.Search;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
@@ -69,10 +68,9 @@ public class NavigationTest
 			LCD.clear();
 			
 			LcdDisplay lcd = new LcdDisplay(odo);
-			Localizer loc = new Localizer(odo, robo);
-			LocalizerBernie locb= new LocalizerBernie(robo, odo);
+			lightlocalization loc = new lightlocalization(robo,odo,nav);
 			BlockDifferentiator bd = new BlockDifferentiator(odo, robo);
-			Search search = new Search(robo, nav, odo, bd);
+			Search search = new Search(robo, nav, odo);
 			
 			
 			robo.setClawAcc(search.CLAW_RAISE_ACC);
@@ -80,14 +78,14 @@ public class NavigationTest
 			robo.rotateClawAbsolute(search.CLAW_RAISE_ANGLE);
 			
 			//loc.doLocalization();
-			locb.localizeTheta();
+			loc.localize();
 			//Button.waitForAnyPress();
 			for(int i =0; i<xCords.length;i++)
 			{
 				RConsole.println("enterd loop");
 				nav.travelTo(true,false, xCords[i], yCords[i]);
 				nav.turnTo(320, true);	
-				scanResults = search.Scan();
+				scanResults = search.Scan(false);
 				if(scanResults[4]==1)
 				{
 					break;
@@ -102,7 +100,7 @@ public class NavigationTest
 					//North blocked and next point is north
 					nav.travelTo(true, false, xCords[i]+30, yCords[i]);
 					nav.turnTo(320, true);
-					search.Scan();
+					search.Scan(false);
 					nav.turnTo(90, true);
 					i++;
 					
@@ -116,7 +114,7 @@ public class NavigationTest
 					//East blocks and next point is east
 					nav.travelTo(true, false, xCords[i],yCords[i]+30);
 					
-					search.Scan();
+					search.Scan(false);
 					nav.turnTo(90, true);
 					i++;
 				}
