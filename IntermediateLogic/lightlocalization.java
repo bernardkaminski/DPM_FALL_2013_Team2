@@ -36,7 +36,7 @@ public class lightlocalization {
 	public void localize(){		
 		int usScannerFirstLine, usScannerSecondLine;
 		
-		robo.rotateClawAbsolute(10);
+		robo.pickUpBlock();
 		
 		robo.setRotationSpeed(LOCALIZATIONSPEED);
 		        

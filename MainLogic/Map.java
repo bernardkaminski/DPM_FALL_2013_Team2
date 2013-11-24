@@ -1,4 +1,5 @@
 package MainLogic;
+import java.util.ArrayList;
 
 /**
  * This class keeps track of the board for the robot
@@ -13,7 +14,8 @@ public class Map {
 	private Point[] dropZone = new Point[2];
 	private Point[] towers;
 	private Point[] walls= new Point[3];
-	
+	public ArrayList<Integer> mem_x=new ArrayList<Integer>();
+    public ArrayList<Integer> mem_y=new ArrayList<Integer>();
 	/**
 	 * 
 	 * @param length length of the board
@@ -79,7 +81,15 @@ public class Map {
 	{
 		return false;
 	}
-	
+	public boolean isInDeadZone(int x, int y)
+	{
+		if (x>=deadZone[0].getx()&&x<=deadZone[1].getx()&&y>=deadZone[0].gety() && y<=deadZone[1].gety())
+		{
+			return true;
+		}
+		else
+			return false;
+	}
 	public Point getDropZoneCenter()
 	{
 		Point p = new Point((dropZone[1].getx()-dropZone[0].getx())/2,(dropZone[1].gety()-dropZone[0].gety())/2 );
@@ -102,4 +112,82 @@ public class Map {
 		return false;
 	}
 
+	public static void convertMap(int[] greenZone,int[] redZone,int startingCorner){
+		int x1Green=greenZone[0];
+		int y1Green=greenZone[1];
+		int x2Green=greenZone[2];
+		int y2Green=greenZone[3];
+		int x1Red=greenZone[0];
+		int y1Red=greenZone[1];
+		int x2Red=greenZone[2];
+		int y2Red=greenZone[3];
+		if(startingCorner==1){
+		//Map remains the same	
+		}
+		if(startingCorner==2){
+			greenZone[0]=y1Green;
+			greenZone[1]=10-x1Green;
+			greenZone[2]=y2Green;
+			greenZone[3]=10-x2Green;
+			redZone[0]=y1Red;
+			redZone[1]=10-x1Red;
+			redZone[2]=y2Red;
+			redZone[3]=10-x2Red;
+		}
+		if(startingCorner==3){
+			greenZone[0]=10-x1Green;
+			greenZone[1]=10-y1Green;
+			greenZone[2]=10-x2Green;
+			greenZone[3]=10-y2Green;
+			redZone[0]=10-x1Red;
+			redZone[1]=10-y1Red;
+			redZone[2]=10-x2Red;
+			redZone[3]=10-y2Red;
+		}
+		if(startingCorner==4){
+			greenZone[0]=10-y1Green;
+			greenZone[1]=x1Green;
+			greenZone[2]=10-y2Green;
+			greenZone[3]=x2Green;
+			redZone[0]=10-y1Red;
+			redZone[1]=x1Red;
+			redZone[2]=10-y2Red;
+			redZone[3]=x2Red;
+		}
+	}
+
+	 public void clearMemPath()
+     {
+     	mem_x.clear();
+     	mem_y.clear();
+     }
+     
+     /**
+      * 
+      * @param x The x value to be added to the path memory
+      * @param y The y value to be added to the path memory
+      */
+     public void MemAddCoordinates(int x,int y)
+     {
+     	mem_x.add(x);
+     	mem_y.add(y);
+     }
+     
+     /**
+      * 
+      * @return The list of x coordinates stored in memory
+      */
+     public ArrayList<Integer> getXMemory()
+     {
+     	return mem_x;
+     }
+     
+     /**
+      * 
+      * @return The list of y coordinates stored in memory
+      */
+     public ArrayList<Integer> getYMemory()
+     {
+     	return mem_y;
+     }
 }

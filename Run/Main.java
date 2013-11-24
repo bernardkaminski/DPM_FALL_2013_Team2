@@ -1,6 +1,8 @@
 package Run;
 import Tests.NavigationTest;
+import Tests.FinalCompetition;
 import lejos.nxt.LCD;
+import lejos.nxt.rcxcomm.PacketHandler;
 
 
 public class Main {
@@ -23,7 +25,8 @@ public class Main {
 		//UltrasonicPollerTest.main();
 		//bluetoothTest.main();
 		//BTTest.main(null);
-		demo.main();
+		//demo.main();
+		FinalCompetition.main();
 	}
 
 }
