@@ -4,6 +4,7 @@ package IntermediateLogic;
 import lejos.nxt.*;
 
 import Hardware.TwoWheeledRobot;
+import MainLogic.Search;
 import lejos.nxt.Button;
 import lejos.nxt.comm.*;
 
@@ -199,6 +200,25 @@ public class Navigation {
         }
        
         public void fineTune(){
+        String card = getCardinalHeading();
+        
+        if(card.equals("NORTH"))
+        {
+        	turnTo(358, true);
+        }
+        if(card.equals("WEST"))
+        {
+        	turnTo(270, true);
+        }
+        if(card.equals("SOUTH"))
+        {
+        	turnTo(180, true);
+        }
+        if(card.equals("EAST"))
+        {
+        	turnTo(90, true);
+        }
+        
         robo.setForwardSpeed((int)(SLOW*1.5));
         robo.stopMotors();    
         leftLightValue=robo.getLeftLightValue();
@@ -374,5 +394,83 @@ public class Navigation {
                     error = angle - odo.getTheta();
             }
            
+        }
+
+        public void stack()
+        {
+        	superTune();
+    		turnTo(45, true);
+    		travelSetDistanceStraight(5);
+            int LINE_LIGHTVALUE_MAX=515;
+            int LINE_LIGHTVALUE_MIN=400;
+            int SLOW =75; 
+            robo.setForwardSpeed((int)(SLOW*1.5));
+            robo.stopMotors();    
+            int leftLightValue=robo.getLeftLightValue();
+            int rightLightValue=robo.getRightLightValue();      
+            turnTo(45, true);
+             while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
+             {               
+                     robo.startLeftMotor();   
+                     leftLightValue=robo.getLeftLightValue();
+             }
+                
+             robo.stopLeftMotor();
+             
+             while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
+             {               
+                     robo.startRightMotor();
+                     rightLightValue=robo.getRightLightValue();    
+             }
+            
+             robo.stopRightMotor();
+             //robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
+             robo.rotateClawAbsoluteWhileBackingUp(robo.CLAW_LOWER_ANGLE);
+             travelSetDistanceBackwards(18);
+             turnTo(0, true);
+             fineTune();
+        }
+
+        public void drop()
+        {
+        	superTune();
+            int LINE_LIGHTVALUE_MAX=515;
+            int LINE_LIGHTVALUE_MIN=400;
+            int SLOW =75; 
+            robo.setForwardSpeed((int)(SLOW*1.5));
+            robo.stopMotors();    
+            int leftLightValue=robo.getLeftLightValue();
+            int rightLightValue=robo.getRightLightValue();      
+            turnTo(45, true);
+            while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
+            {               
+                 robo.startLeftMotor();   
+                 leftLightValue=robo.getLeftLightValue();
+            }
+                    
+        	 robo.stopLeftMotor();
+        	 
+        	 while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
+        	 {               
+        	         robo.startRightMotor();
+        	         rightLightValue=robo.getRightLightValue();    
+        	 }
+        	
+        	 robo.stopRightMotor();
+        	 robo.dropBlock();
+        	 travelSetDistanceBackwards(18);
+        	 robo.pickUpBlock();
+        	 turnTo(0, true);
+        	 fineTune();
+        }
+
+        public void superTune()
+        {
+        	turnTo(90, true);
+    		travelSetDistanceBackwards(5);
+    		fineTune();
+    		turnTo(0, true);
+    		travelSetDistanceBackwards(5);
+    		fineTune();
         }
 }

@@ -1,6 +1,6 @@
 package Run;
 import Tests.NavigationTest;
-import Tests.PathTest;
+import Tests.FinalCompetition;
 import lejos.nxt.LCD;
 import lejos.nxt.rcxcomm.PacketHandler;
 
@@ -26,7 +26,7 @@ public class Main {
 		//bluetoothTest.main();
 		//BTTest.main(null);
 		//demo.main();
-		PathTest.main();
+		FinalCompetition.main();
 	}
 
 }
