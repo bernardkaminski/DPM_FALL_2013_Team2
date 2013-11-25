@@ -405,7 +405,6 @@ public class Navigation {
             int LINE_LIGHTVALUE_MIN=400;
             int SLOW =75; 
             robo.setForwardSpeed((int)(SLOW*1.5));
-            robo.stopMotors();    
             int leftLightValue=robo.getLeftLightValue();
             int rightLightValue=robo.getRightLightValue();      
             turnTo(45, true);
@@ -424,8 +423,8 @@ public class Navigation {
              }
             
              robo.stopRightMotor();
-             //robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
-             robo.rotateClawAbsoluteWhileBackingUp(robo.CLAW_LOWER_ANGLE);
+             robo.dropBlock();
+             //robo.rotateClawAbsoluteWhileBackingUp(robo.CLAW_LOWER_ANGLE);
              travelSetDistanceBackwards(18);
              turnTo(0, true);
              fineTune();
@@ -434,14 +433,15 @@ public class Navigation {
         public void drop()
         {
         	superTune();
-            int LINE_LIGHTVALUE_MAX=515;
+        	turnTo(45, true);
+        	travelSetDistanceStraight(4);
+        	int LINE_LIGHTVALUE_MAX=515;
             int LINE_LIGHTVALUE_MIN=400;
             int SLOW =75; 
-            robo.setForwardSpeed((int)(SLOW*1.5));
-            robo.stopMotors();    
+            robo.setForwardSpeed((int)(SLOW*1.5));    
             int leftLightValue=robo.getLeftLightValue();
             int rightLightValue=robo.getRightLightValue();      
-            turnTo(45, true);
+            
             while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
             {               
                  robo.startLeftMotor();   
@@ -449,6 +449,7 @@ public class Navigation {
             }
                     
         	 robo.stopLeftMotor();
+        	 robo.startRightMotor();
         	 
         	 while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
         	 {               
