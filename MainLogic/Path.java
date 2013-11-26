@@ -306,7 +306,7 @@ public class Path
                             nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i)+30);
                             generatePath(xCords.get(i)+30,yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
                             return true;
-                    }
+                    }	
                     nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
                     generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
                     return true;

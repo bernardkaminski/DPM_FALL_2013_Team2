@@ -72,6 +72,7 @@ public class Map {
 		deadZone[0]=bottomLeft;
 		deadZone[1]=topRight;
 	}
+	
 	/**
 	 * 
 	 * @param point The point to be tested
@@ -90,6 +91,27 @@ public class Map {
 		else
 			return false;
 	}
+	
+	public Point getDropZoneBottomLeft()
+	{
+		return dropZone[0];
+	}
+	
+	public Point getDeadZoneBottomLeft()
+	{
+		return deadZone[0];
+	}
+	
+	public Point getDropZoneTopRight()
+	{
+		return dropZone[1];
+	}
+	
+	public Point getDeadZoneTopRight()
+	{
+		return deadZone[1];
+	}
+	
 	public Point getDropZoneCenter()
 	{
 		Point p = new Point((dropZone[1].getx()-dropZone[0].getx())/2,(dropZone[1].gety()-dropZone[0].gety())/2 );
@@ -100,6 +122,29 @@ public class Map {
 	{
 		Point p = new Point((deadZone[1].getx()-deadZone[0].getx())/2,(deadZone[1].gety()-deadZone[0].gety())/2 );
 		return p;
+	}
+	
+	public void flipZones()
+	{
+		double xOldDrop1=dropZone[0].getx();
+		double yOldDrop1=dropZone[0].gety();
+		double xOldDrop2=dropZone[1].getx();
+		double yOldDrop2=dropZone[1].gety();
+		
+		double xOldDead1=deadZone[0].getx();
+		double yOldDead1=deadZone[0].gety();
+		double xOldDead2=deadZone[1].getx();
+		double yOldDead2=deadZone[1].gety();
+		
+		dropZone[0].setx(xOldDead1);
+		dropZone[0].sety(yOldDead1);
+		dropZone[1].setx(xOldDead2);
+		dropZone[1].sety(yOldDrop2);
+		
+		deadZone[0].setx(xOldDrop1);
+		deadZone[0].sety(yOldDrop1);
+		deadZone[1].setx(xOldDrop2);
+		deadZone[1].sety(yOldDrop2);
 	}
 	
 	/**
