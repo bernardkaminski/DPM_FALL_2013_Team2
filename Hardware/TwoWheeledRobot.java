@@ -5,7 +5,7 @@ import lejos.nxt.NXTRegulatedMotor;
 
 /**
  * The class that has all the hardware necessary, it controls the three motors and the four sensors.
- * @author Bernie, Connor
+ * @author Bernie, Connor, Deepak
  * @version 1.0
  * @see UltrasonicPoller,LightPoller,UltrasonicScanner,NXTRegulatedMotor
  */

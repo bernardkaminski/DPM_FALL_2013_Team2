@@ -10,7 +10,7 @@ import lejos.nxt.comm.*;
 
 /**
 * the class that allows the robot to move tospecific locations. this class also corrects the odometer while traveling to locations.
-* @author Bernie, Connor
+* @author Bernie, Connor, Deepak, Adip
 *
 */
 public class Navigation {

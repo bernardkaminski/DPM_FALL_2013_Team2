@@ -1,4 +1,10 @@
 package IntermediateLogic;
+/**
+ * This class is what is used to differentiate between an obstacle and a building block. 
+ * @author Deepak, Adip
+ * @version 1.0
+ * @see TwoWheeledRobot, Odometer, Navigation
+ */
 
 import Hardware.TwoWheeledRobot;
 import lejos.nxt.*;
