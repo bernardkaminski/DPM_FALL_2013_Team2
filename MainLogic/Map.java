@@ -139,7 +139,7 @@ public class Map {
 		dropZone[0].setx(xOldDead1);
 		dropZone[0].sety(yOldDead1);
 		dropZone[1].setx(xOldDead2);
-		dropZone[1].sety(yOldDrop2);
+		dropZone[1].sety(yOldDead2);
 		
 		deadZone[0].setx(xOldDrop1);
 		deadZone[0].sety(yOldDrop1);

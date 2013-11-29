@@ -1,13 +1,13 @@
 package MainLogic;
 
-
+import java.util.Random;
 import java.util.ArrayList;
 
 import IntermediateLogic.Navigation;
 
 public class Path 
 { 
-    public static void generatePath(int xStart, int yStart, int xZone,int yZone,ArrayList<Integer>xCords, ArrayList<Integer>yCords)
+	public static void generatePath(int xStart, int yStart, int xZone,int yZone,ArrayList<Integer>xCords, ArrayList<Integer>yCords)
     {        
             //Remove all points
     		boolean up;
@@ -19,10 +19,41 @@ public class Path
     			}
     			else{right=false;}
     		}
+    		else if(yZone==yStart)
+    		{
+    			if(xZone>xStart)
+    			{
+    				right = true;
+    				up=false;
+    			}
+    			else
+    			{
+    				right = false;
+    				up = false;
+    			}
+    			fill(xStart, yStart, xZone, yZone, xCords, yCords, up, right);
+    			return;
+    		}
     		else{
     			up=false;
     			if(xZone<xStart){
     				right=true;
+    			}
+    			else if(xZone==xStart)
+    			{
+    				if(yZone>yStart)
+        			{
+        				right = true;
+        				up=true;
+        			}
+        			else
+        			{
+        				right = false;
+        				up = false;
+        			}
+        			fill(xStart, yStart, xZone, yZone, xCords, yCords, up, right);
+        			return;
+    				
     			}
     			else{
     				right=false;
@@ -56,7 +87,10 @@ public class Path
                                         if(j==1)
                                         {
                                                 xCords.remove(0);
-                                                yCords.remove(0);        
+                                                yCords.remove(0);
+                                                yCords.add(yStart);
+                                                xCords.add(xStart);
+                                   
                                         }
                                         //keep x the same
                                         xCords.add(xZone);
@@ -81,7 +115,9 @@ public class Path
                                         if(j==1)
                                         {
                                                 xCords.remove(0);
-                                                yCords.remove(0);        
+                                                yCords.remove(0);  
+                                                yCords.add(yStart);
+                                                xCords.add(xStart);
                                         }
                                         yCords.add(yZone);
                                         if(right){
@@ -274,39 +310,177 @@ public class Path
             }
     }
 
+	public static boolean fill(int xStart, int yStart, int xZone,int yZone,ArrayList<Integer>xCords, ArrayList<Integer>yCords,boolean up,boolean right)
+	{
+		//X is already aligned with green zone
+        if(xStart==xZone)
+        {                        	
+            int j=1;
+            xCords.add(-1);
+            yCords.add(-1);
+            
+            while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone))
+            {
+                    if(j==1)
+                    {
+                            xCords.remove(0);
+                            yCords.remove(0); 
+                            yCords.add(yStart);
+                            xCords.add(xStart);
+               
+                    }
+                    //keep x the same
+                    xCords.add(xZone);
+                    //Fill in y coords accordingly 
+                    if(up){
+                    	  yCords.add(yStart+(j*30));  
+                    }
+                    else{
+                    	 yCords.add(yStart-(j*30));  
+                    }
+                    j++;
+            }
+            return true;
+         }
+      else
+        {
+            int j=1;
+            xCords.add(-1);
+            yCords.add(-1);
+            while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone))
+            { 
+                    if(j==1)
+                    {
+                            xCords.remove(0);
+                            yCords.remove(0);   
+                            yCords.add(yStart);
+                            xCords.add(xStart);
+                    }
+                    yCords.add(yZone);
+                    if(right){
+                    	xCords.add(xStart+(j*30)); 
+                    }
+                    else{
+                    	xCords.add(xStart-(j*30)); 
+                    }
+                    j++;
+            }
+            return true;
+                
+        }
+   
+	}
+	
 
     public static boolean processData(int[]scanResults,ArrayList<Integer>xCords, ArrayList<Integer>yCords, int i, Navigation nav, Map map){        
             
+    	Random rand = new Random();
+    	boolean up;
+		boolean right;
+		if(yCords.get(yCords.size()-1)>yCords.get(0)){
+			up=true;
+			if(xCords.get(xCords.size()-1)>xCords.get(0)){
+				right=true;
+			}
+			else{right=false;}
+		}
+		else{
+			up=false;
+			if(xCords.get(xCords.size()-1)<xCords.get(0)){
+				right=true;
+			}
+			else{
+				right=false;
+			}
+		}
+    	
+    	
             //North blocked and next point is north
-            if(scanResults[0]==1&&yCords.get(i+1)>yCords.get(i)|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1)))
+            if((yCords.get(i+1)>yCords.get(i))&&(scanResults[0]==1|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1))))
             {
-                    //West travelling zig zag
-                    if(xCords.get(i+2)<xCords.get(i)){
-                            nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
-                            generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);                              
-                            return true;
+            	
+            	if((i+1)==xCords.size()-1)
+            	{
+            		//do something
+            	}
+            	
+            	if(xCords.get(i)==xCords.get(xCords.size()-1))
+            	{
+            		boolean random = rand.nextBoolean();
+                    if(random)
+                    {
+                    	 nav.travelTo(true, false, xCords.get(i)+60, yCords.get(i));
+                    	 generatePath(xCords.get(i)+60,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                         return true;
                     }
-                    //East travelling zig zag
                     else
                     {
-                    nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i));
-                    generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
-                    
-                    return true;
-                    }        
+                    	nav.travelTo(true, false, xCords.get(i)-60, yCords.get(i));
+                   	 	generatePath(xCords.get(i)-60,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                        return true;
+                    }
+            		
+            	}
+            
+            	//West travelling zig zag
+               if(xCords.get(i+2)<xCords.get(i))
+               {
+            	   
+            	   if(scanResults[3]==1)//west blocked
+            	   {
+            		   //double block case
+            		   nav.travelTo(true, false, xCords.get(i), yCords.get(i)-30);
+                       generatePath(xCords.get(i),yCords.get(i)-30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);                              
+                       return true;
+            	   }
+                        nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
+                        generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);                              
+                        return true;
+                }
+                //East travelling zig zag
+                else
+                {
+                	if(scanResults[1]==1)//east blocked
+             	   {
+                		nav.travelTo(true, false, xCords.get(i), yCords.get(i)-30);
+                        generatePath(xCords.get(i),yCords.get(i)-30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);                              
+                        return true;
+             	   }
+                nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i));
+                generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                
+                return true;
+                }        
             }
             
             //East blocks and next point east
-            if(scanResults[1]==1&&xCords.get(i+1)>xCords.get(i)|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1)))
+            if((xCords.get(i+1)>xCords.get(i))&&(scanResults[1]==1|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1))))
             {
                     
                     if(yCords.get(yCords.size()-1)==yCords.get(i))
                     {
-                            nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
-                            nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i)+30);
-                            generatePath(xCords.get(i)+30,yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
-                            return true;
-                    }	
+                           
+                            //if random
+                            boolean random = rand.nextBoolean();
+                            if(random)
+                            {
+                            	 nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
+                            	 generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                                 return true;
+                            }
+                            else
+                            {
+                            	 nav.travelTo(true, false, xCords.get(i), yCords.get(i)-30);
+                            	 generatePath(xCords.get(i),yCords.get(i)-30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                                 return true;
+                            }
+                           
+                    }
+                    if(scanResults[0]==1)//north blocked
+              	   {
+              		   //double block case
+              	   }
+                  //always go up by default?
                     nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
                     generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
                     return true;
@@ -314,37 +488,88 @@ public class Path
             }
             
             //West blocked and next point west
-            if(scanResults[3]==1&&xCords.get(i+1)<xCords.get(i)|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1)))
+            if((xCords.get(i+1)<xCords.get(i))&&(scanResults[3]==1|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1))))
             {
                     
                     if(yCords.get(yCords.size()-1)==yCords.get(i))
                     {
-                            nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
-                            nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i)+30);
-                            generatePath(xCords.get(i)-30,yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
-                            return true;
+	                    boolean random = rand.nextBoolean();
+	                    if(random)
+	                    {
+	                    	 nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
+	                    	 generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+	                         return true;
+	                    }
+	                    else
+	                    {
+	                    	 nav.travelTo(true, false, xCords.get(i), yCords.get(i)-30);
+	                    	 generatePath(xCords.get(i),yCords.get(i)-30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+	                         return true;
+	                    }
                     }
+                    if(scanResults[1]==1)//north blocked
+              	   {
+              		   //double block case
+              	   }
+                    //always go up by default?
                     nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
                     generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
                     return true;
             }
             
             //South blocked and next point is south
-            if(scanResults[2]==1&&yCords.get(i+1)<yCords.get(i)|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1)))
+            if((yCords.get(i+1)<yCords.get(i))&&(scanResults[2]==1|| map.isInDeadZone(xCords.get(i+1), yCords.get(i+1))))
             {
-                    //West travelling zig zag
-                    if(xCords.get(i+2)>xCords.get(i))
+//            	if((i+1)==xCords.size()-1)
+//            	{
+//            		//do something
+//            		//maybe regenerate
+//            	}
+                   
+            	if(xCords.get(i)==xCords.get(xCords.size()-1))
+            	{
+            		boolean random = rand.nextBoolean();
+                    if(random)
                     {
-                             
-                            nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
-                            generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
-                            return true;
+                    	 nav.travelTo(true, false, xCords.get(i)+60, yCords.get(i));
+                    	 generatePath(xCords.get(i)+60,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                         return true;
                     }
-                    //East travelling zig zag
                     else
                     {
-                            nav.travelTo(true, false, xCords.get(i)+30, yCords.get(i));
-                            generatePath(xCords.get(i)+30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                    	nav.travelTo(true, false, xCords.get(i)-60, yCords.get(i));
+                   	 	generatePath(xCords.get(i)-60,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                        return true;
+                    }
+            		
+            	}
+            	//West travelling zig zag
+                    if(xCords.get(i+2)>xCords.get(i))
+                    {
+                    	if(scanResults[3]==1)//west blocked
+                  	   	{
+                  		   //double block case
+                    		nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
+                            generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                            return true;
+                  	   	}
+                    	else{
+                            nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
+                            generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                            return true;}
+                    }
+                    //East travelling zig zag
+                    else if(xCords.get(i+2)<xCords.get(i))
+                    {
+                    	if(scanResults[1]==1)//east blocked
+                  	   {
+                    		//double block case
+                    		nav.travelTo(true, false, xCords.get(i), yCords.get(i)+30);
+                            generatePath(xCords.get(i),yCords.get(i)+30,xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
+                            return true;
+                  	   }
+                            nav.travelTo(true, false, xCords.get(i)-30, yCords.get(i));
+                            generatePath(xCords.get(i)-30,yCords.get(i),xCords.get(xCords.size()-1),yCords.get(yCords.size()-1),xCords,yCords);
                             return true;
                     }        
             }
@@ -354,12 +579,12 @@ public class Path
 
     public static Point[] generateMockGreen(Point BottomLeftGreenZone, Point TopRightGreenZone)
     {
-            if(BottomLeftGreenZone.getx()>=3*30)
+            if(BottomLeftGreenZone.getx()>=5*30)
             {        
-                    if(BottomLeftGreenZone.gety()>=3*30)
+                    if(BottomLeftGreenZone.gety()>=5*30)
                     {
-                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()-2*30,BottomLeftGreenZone.gety()-2*30);
-                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()-2*30,TopRightGreenZone.gety()-2*30);
+                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()-4*30,BottomLeftGreenZone.gety()-4*30);
+                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()-4*30,TopRightGreenZone.gety()-4*30);
                             Point[]mockGreen= new Point[2];
                             mockGreen[0]=mockGreenBottomLeft;
                             mockGreen[1]=mockGreenTopRight;
@@ -367,8 +592,8 @@ public class Path
                     }
                     else
                     {
-                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()-2*30,BottomLeftGreenZone.gety()+2*30);
-                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()-2*30,TopRightGreenZone.gety()+2*30);
+                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()-4*30,BottomLeftGreenZone.gety()+4*30);
+                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()-4*30,TopRightGreenZone.gety()+4*30);
                             Point[]mockGreen= new Point[2];
                             mockGreen[0]=mockGreenBottomLeft;
                             mockGreen[1]=mockGreenTopRight;
@@ -376,12 +601,12 @@ public class Path
                     }
                     
             }
-            if(BottomLeftGreenZone.getx()<3*30)
+            if(BottomLeftGreenZone.getx()<5*30)
             {
-                    if(BottomLeftGreenZone.gety()>=3*30)
+                    if(BottomLeftGreenZone.gety()>=5*30)
                     {
-                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()+2*30,BottomLeftGreenZone.gety()-2*30);
-                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()+2*30,TopRightGreenZone.gety()-2*30);
+                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()+4*30,BottomLeftGreenZone.gety()-4*30);
+                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()+4*30,TopRightGreenZone.gety()-4*30);
                             Point[]mockGreen= new Point[2];
                             mockGreen[0]=mockGreenBottomLeft;
                             mockGreen[1]=mockGreenTopRight;
@@ -389,8 +614,8 @@ public class Path
                     }
                     else
                     {
-                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()+2*30,BottomLeftGreenZone.gety()+2*30);
-                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()+2*30,TopRightGreenZone.gety()+2*30);
+                            Point mockGreenBottomLeft= new Point(BottomLeftGreenZone.getx()+4*30,BottomLeftGreenZone.gety()+4*30);
+                            Point mockGreenTopRight= new Point(TopRightGreenZone.getx()+4*30,TopRightGreenZone.gety()+4*30);
                             Point[]mockGreen= new Point[2];
                             mockGreen[0]=mockGreenBottomLeft;
                             mockGreen[1]=mockGreenTopRight;

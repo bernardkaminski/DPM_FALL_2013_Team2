@@ -14,6 +14,7 @@ import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.comm.RConsole;
 import lejos.nxt.rcxcomm.PacketHandler;
 import bluetooth.*;
 import MainLogic.*;
@@ -43,11 +44,12 @@ public class Main {
         Navigation nav = new Navigation(robo, odo, null);
         lightlocalization loc = new lightlocalization( robo,odo,nav);
         Search search = new Search(robo, nav, odo);
-        Clock timeLimit = new Clock(300000);
+        
         
         //Set up bluetooth
         BluetoothConnection conn = new BluetoothConnection();
         Transmission t = conn.getTransmission();
+        //RConsole.openAny(20000);
         if (t == null) 
         {
                 LCD.drawString("Failed to read transmission", 0, 5);
@@ -70,16 +72,18 @@ public class Main {
                 Point BottomLeftGreenZone= new Point(greenZone[0]*30,greenZone[1]*30);
                 Point TopRightGreenZone=new Point(greenZone[2]*30,greenZone[3]*30);
                 
+                PlayerRole role = t.role;
+                
                 map.setDropZone(BottomLeftGreenZone, TopRightGreenZone);
                 
-                if(t.role.equals("Builder"))
+                if(role.getId()==1)
                 {
-                	Builder.main(odo, robo, nav, search, loc, timeLimit, map, startingCornerID );
+                	Builder.main(odo, robo, nav, search, loc, map, startingCornerID );
                 }
                 else
                 {
                 	
-                	Collector.main(odo, robo, nav, search, loc, timeLimit, map, startingCornerID);
+                	Collector.main(odo, robo, nav, search, loc, map, startingCornerID);
                 }
         
        }
