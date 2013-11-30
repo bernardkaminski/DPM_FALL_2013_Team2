@@ -1,4 +1,10 @@
 package IntermediateLogic;
+/**
+ * This is the class for lightlocalization used in the competition 
+ * @author Deepak, Adip
+ * @version 1.0
+ * @see TwoWheeledRobot, Odometer, Navigation
+ */
 
 import Hardware.TwoWheeledRobot;
 import lejos.nxt.*;
