@@ -1,4 +1,10 @@
 package IntermediateLogic;
+/**
+ * This is the class for lightlocalization used in the competition 
+ * @author Deepak, Adip
+ * @version 1.0
+ * @see TwoWheeledRobot, Odometer, Navigation
+ */
 
 import Hardware.TwoWheeledRobot;
 import lejos.nxt.*;
@@ -103,8 +109,8 @@ public class lightlocalization {
 		while (true) 
 			{
 				changeInLightValue = lightValue - robo.getLeftLightValue();
-				lightValue = robo.getLeftLightValue();
-				if((Math.abs(changeInLightValue) > minChangeToIndicateLine)&&(Math.abs(changeInLightValue) < maxChangeToIndicateLine)&&(lightValue<520))// this senses the change in colour on the floor . therefore for each line it senses two changes entering and exiting
+				leftLightValue = robo.getLeftLightValue();
+				if(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN)// this senses the change in colour on the floor . therefore for each line it senses two changes entering and exiting
 				{
 					RConsole.println(changeInLightValue+" "+lightValue );
 					lineCounter++;//increment the amount of times a change in color has been sensed 

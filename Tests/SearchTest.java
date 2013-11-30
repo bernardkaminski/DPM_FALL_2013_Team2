@@ -1,4 +1,12 @@
 package Tests;
+
+/**
+ * This class is used for the search algorithm
+ * @author Deepak, Miguel, Adip, Bernie, Connor
+ * @version 1.0
+ * @see TwoWheeledRobot
+ */
+
 import IntermediateLogic.*;
 
 import Hardware.LightPoller;
