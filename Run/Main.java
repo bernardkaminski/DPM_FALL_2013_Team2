@@ -7,8 +7,6 @@ import IntermediateLogic.Navigation;
 import IntermediateLogic.Odometer;
 import IntermediateLogic.lightlocalization;
 import MainLogic.Search;
-import Tests.NavigationTest;
-import Tests.FinalCompetition;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
@@ -21,11 +19,11 @@ import MainLogic.*;
 
 public class Main {
 
-	
-	public static void main(String[] args) 
-	{
-		
-		ColorSensor csLeft= new ColorSensor(SensorPort.S1);
+        
+        public static void main(String[] args) 
+        {
+                
+                ColorSensor csLeft= new ColorSensor(SensorPort.S1);
         ColorSensor csRight=new ColorSensor(SensorPort.S4);
         UltrasonicSensor UsBottom= new UltrasonicSensor(SensorPort.S2);
         UltrasonicSensor UsTop= new UltrasonicSensor(SensorPort.S3);
@@ -78,15 +76,15 @@ public class Main {
                 
                 if(role.getId()==1)
                 {
-                	Builder.main(odo, robo, nav, search, loc, map, startingCornerID );
+                        Builder.main(odo, robo, nav, search, loc, map, startingCornerID );
                 }
                 else
                 {
-                	
-                	Collector.main(odo, robo, nav, search, loc, map, startingCornerID);
+                        
+                        Collector.main(odo, robo, nav, search, loc, map, startingCornerID);
                 }
         
        }
-	}
+        }
 
 }
