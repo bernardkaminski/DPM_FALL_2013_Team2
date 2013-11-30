@@ -21,15 +21,15 @@ public class Search {
         private final int QUICK_SCAN_GO_SPEED=200;
         private final int QUICK_SCAN_SCAN_SPEED=100;
         private final int QUICK_SCAN_PLUS=60;//60
-        private final int QUICK_SCAN_MINUS=25;//10
-        private final int QUICK_SCAN_DIFF=10;
+        private final int QUICK_SCAN_MINUS=10;//10
+        private final int QUICK_SCAN_DIFF=15;
         private final int QUICK_SCAN_CLIP=20; //10 //35
         private final int QUICK_SCAN_NUM_SCAN=1;
 
         
         //PROCESS DATA VARIABLES
         private final double REQ_BLUE_CERT=0.75;//0.85 //percentage to be sure its a blue
-        private final double REQ_WOOD_CERT=0.2; //0.5 //percent. higher than this value to be sure its a wood block
+        private final double REQ_WOOD_CERT=0.5; //0.5 //percent. lower than this value to be sure its a wood block
         
         //ALIGN VARIABLES
         private final int NUM_INDEX_CLIP=20; //10 //35 //45
@@ -37,7 +37,7 @@ public class Search {
         //SECTION VARIABLES
         private final double SCAN_DIST_THRESH=26;
         private final double SCAN_DIST_BAND=1; //5
-        private final int BLOCK_COUNT_THRESH=100;//60 //40 //might have to change this
+        private final int BLOCK_COUNT_THRESH=60;//40 //might have to change this
         private final int BLOCK_COUNT_MIN=10;
         //private final double BLOCK_DIFF_RANGE=2;
         
@@ -50,17 +50,15 @@ public class Search {
         private final double EAST;
         private final double WEST;
         private final double POINT_BLOCKED_ERROR=20; //angle
-        private final double POINT_BLOCKED_DIST=45;//50
+        private final double POINT_BLOCKED_DIST=50;
         private final int WOOD_COUNT_MIN=5;//5
         
         //GRAB BLOCK VARIABLES
-	    private final int CLAW_RECUR_LIM=3;
+	    private final int CLAW_RECUR_LIM=4;
 	    private int recursion_count=0;
 	    private final double PUSH_BLOCK_DIST=25;
 	    private final double BLOCK_LEEWAY=15; //must be smaller than pushblockdist
-	    private final double SAFE_PUSH=10;
-	    private final double RECUR_SCAN_DIST=25;
-	    private final double RECUR_MOVE_DIST=10;
+	    private final double SAFE_PUSH=5;
     
         //objects
         private TwoWheeledRobot robo;
@@ -86,7 +84,7 @@ public class Search {
          * 1: EAST scan point (0 if clear) (1 if blocked)
          * 2: SOUTH scan point (0 if clear) (1 if blocked)
          * 3: WEST scan point (0 if clear) (1 if blocked)
-         * 4: found block? (0 if no) (1 if yes) (2 if failed)
+         * 4: found block? (0 if no) (1 if yes)
          */
         public int[] Scan(boolean hasBlock){
         		double startAngle=odo.getTheta()-ANGLE_DECREASE;
@@ -96,7 +94,6 @@ public class Search {
                 int most_blue_index=0;
                 int quick_result=1;
                 double temp_ang;
-                String temp_card;
                 
                 //handle boundary cases
                 if(startAngle<0){
@@ -105,6 +102,8 @@ public class Search {
                 if(goalAngle>=360){
                     goalAngle-=360;
                 }
+
+                //robo.pickUpBlock();
                 
                 //variables
                 ArrayList<Double> headings = new ArrayList<Double>();
@@ -113,38 +112,37 @@ public class Search {
                 ArrayList<ArrayList<Double>> blocks = new ArrayList<ArrayList<Double>>();
                 
                 //--------------QUICK SCAN
-//                if(hasBlock==true){ //handle multiple blocked cases
-//                	RConsole.println("HAS BLOCK");
-//                	for(int i=0;i<4;i++)
-//                	{
-//                		temp_card=nav.getCardinalHeading();
-//                		quick_result=quickScan();
-//                		if(quick_result==0)
-//                		{
-//                			break;
-//                		}
-//                		else
-//                		{
-//                			if(temp_card.equals("NORTH"))
-//                				output_array[0]=1;
-//                			if(temp_card.equals("EAST"))
-//                				output_array[1]=1;
-//                			if(temp_card.equals("SOUTH"))
-//                				output_array[2]=1;
-//                			if(temp_card.equals("WEST"))
-//                				output_array[3]=1;
-//                		}
-//                		temp_ang=odo.getTheta()+90-QUICK_SCAN_PLUS;
-//                		
-//                		if(temp_ang>=360)
-//                			temp_ang-=360;
-//                		
-//                		robo.setRotationSpeed(QUICK_SCAN_GO_SPEED);
-//                		nav.turnTo(temp_ang,true);
-//                			
-//                	}
-//                	return output_array;
-//                }
+                if(hasBlock==true){ //handle multiple blocked cases
+                	RConsole.println("HAS BLOCK");
+                	for(int i=0;i<4;i++)
+                	{
+                		quick_result=quickScan();
+                		if(quick_result==0)
+                		{
+                			break;
+                		}
+                		else
+                		{
+                			if(nav.getCardinalHeading().equals("NORTH"))
+                				output_array[0]=1;
+                			if(nav.getCardinalHeading().equals("EAST"))
+                				output_array[1]=1;
+                			if(nav.getCardinalHeading().equals("SOUTH"))
+                				output_array[2]=1;
+                			if(nav.getCardinalHeading().equals("WEST"))
+                				output_array[3]=1;
+                		}
+                		temp_ang=odo.getTheta()+90-QUICK_SCAN_PLUS;
+                		
+                		if(temp_ang>=360)
+                			temp_ang-=360;
+                		
+                		robo.setRotationSpeed(QUICK_SCAN_GO_SPEED);
+                		nav.turnTo(temp_ang,true);
+                			
+                	}
+                	return output_array;
+                }
                 //---------------END OF QUICK SCAN
                 
                 //RConsole.open();
@@ -194,17 +192,15 @@ public class Search {
                 }
                 
                 //maybe grab block
-                if(most_blue>REQ_BLUE_CERT&&!hasBlock){
+                if(most_blue>REQ_BLUE_CERT){
                         //GRABBING METHOD HERE
                         //WILL PROBABLY WANT OFFSET
-                		RConsole.println("BLUE BLOCK DETECTED");
-                        RConsole.println("\nGrabbing start: "+blocks.get(most_blue_index).get(0)+" end: "+blocks.get(most_blue_index).get(1)+" avg: "+blocks.get(most_blue_index).get(2)+" type: "+blocks.get(most_blue_index).get(3));
+                        RConsole.println("\nGrabbing: "+blocks.get(most_blue_index).get(0)+" end: "+blocks.get(most_blue_index).get(1)+" avg: "+blocks.get(most_blue_index).get(2)+" type: "+blocks.get(most_blue_index).get(3));
                         output_array[4]=1;
                         nav.turnTo(blocks.get(most_blue_index).get(2), true);
                         GrabBlock();
-                        if(recursion_count>CLAW_RECUR_LIM)
-                        {
-                                output_array[4]=2;
+                        if(recursion_count>CLAW_RECUR_LIM){
+                                output_array[4]=0;
                         }
                 }
                 
@@ -212,7 +208,6 @@ public class Search {
                 RConsole.println("\noutput_array: ");
                 for(int i=0;i<output_array.length;i++)
                         RConsole.print(" "+output_array[i]);
-                RConsole.println("");
                 
                 
                 //RConsole.close();
@@ -254,19 +249,19 @@ public class Search {
             }
             robo.stopMotors();
             
-//        	RConsole.println("blockDiff size: "+blockDiff.size());
-//            RConsole.println("topData size: "+topData.size());
-//            RConsole.println("bottomData size: "+bottomData.size());
+        	RConsole.println("blockDiff size: "+blockDiff.size());
+            RConsole.println("topData size: "+topData.size());
+            RConsole.println("bottomData size: "+bottomData.size());
             
             //align data
             alignData(headings,topData,bottomData,QUICK_SCAN_CLIP);
         	
-//        	RConsole.println("blockDiff size: "+blockDiff.size());
-//            RConsole.println("topData size: "+topData.size());
-//            RConsole.println("bottomData size: "+bottomData.size());
+        	RConsole.println("blockDiff size: "+blockDiff.size());
+            RConsole.println("topData size: "+topData.size());
+            RConsole.println("bottomData size: "+bottomData.size());
              
             //print data
-           /* for(int i=0;i<headings.size();i++)
+            for(int i=0;i<headings.size();i++)
             {
                     RConsole.print(headings.get(i)+"\t");
             }
@@ -282,8 +277,8 @@ public class Search {
             }
             
             RConsole.println("");
-            RConsole.println("");*/
-//            
+            RConsole.println("");
+            
             return woodDifferentiate(topData, bottomData);
         }
         
@@ -300,16 +295,14 @@ public class Search {
                         //2:avg heading
                         //3:certainty of blue block
                 
-                RConsole.println("Process Data Called");
-                
                 //RConsole.println("blockDiff size: "+blockDiff.size());
                 //RConsole.println("topData size: "+topData.size());
                 //RConsole.println("bottomData size: "+bottomData.size());
                 
                 //align data
-                alignData(headings,topData,bottomData,NUM_INDEX_CLIP);
-                
-                //print data
+//                alignData(headings,topData,bottomData,NUM_INDEX_CLIP);
+//                
+//                //print data
 //                for(int i=0;i<headings.size();i++){
 //                        RConsole.print(headings.get(i)+"\t");
 //                }
@@ -330,9 +323,9 @@ public class Search {
                 //blockDifferentiating
                 blockDiff=blueDifferentiate(topData,bottomData);
                 
-//                RConsole.println("blockDiff size: "+blockDiff.size());
-//                RConsole.println("topData size: "+topData.size());
-//                RConsole.println("bottomData size: "+bottomData.size());
+                //RConsole.println("blockDiff size: "+blockDiff.size());
+                //RConsole.println("topData size: "+topData.size());
+                //RConsole.println("bottomData size: "+bottomData.size());
                 
                 //create blocks
                 for(int i=0;i<startIndexes.size();i++){
@@ -343,7 +336,7 @@ public class Search {
                         temp_block.add(headings.get(endIndexes.get(i)));
                         
                         //handles average cases
-                        if(temp_block.get(0)>=270 && temp_block.get(1)<=180){
+                        if(temp_block.get(0)>=270 && temp_block.get(1)<=90){
                                 currAvg=((temp_block.get(0)+temp_block.get(1))/2)+180;
                                 if(currAvg>360)
                                 {
@@ -368,17 +361,9 @@ public class Search {
                 
                 //check cardinals -done by referencing
                 main_output[0]=checkCardinals(headings,topData,bottomData,NORTH);
-                if (main_output[0]==1)
-                	RConsole.println("NORTH BLOCKED");
                 main_output[1]=checkCardinals(headings,topData,bottomData,EAST);
-                if (main_output[1]==1)
-                	RConsole.println("EAST BLOCKED");
                 main_output[2]=checkCardinals(headings,topData,bottomData,SOUTH);
-                if (main_output[2]==1)
-                	RConsole.println("SOUTH BLOCKED");
                 main_output[3]=checkCardinals(headings,topData,bottomData,WEST);
-                if (main_output[3]==1)
-            		RConsole.println("WEST BLOCKED");
                 
                 
                 return output_blocks;
@@ -440,14 +425,14 @@ public class Search {
                         endIndexes.add(bottomData.size()-1);
                 }
                 
-//                RConsole.print("\n start indexes: " );
-//                for(int i=0;i<startIndexes.size();i++)
-//                        RConsole.print(" "+startIndexes.get(i));
-//                
-//                RConsole.print("\n end indexes: " );
-//                for(int i=0;i<endIndexes.size();i++)
-//                        RConsole.print(" "+endIndexes.get(i));
-//                RConsole.print("\n");
+                RConsole.print("\n start indexes: " );
+                for(int i=0;i<startIndexes.size();i++)
+                        RConsole.print(" "+startIndexes.get(i));
+                
+                RConsole.print("\n end indexes: " );
+                for(int i=0;i<endIndexes.size();i++)
+                        RConsole.print(" "+endIndexes.get(i));
+                RConsole.print("\n");
                 
                 
                 output.add(startIndexes);
@@ -509,7 +494,7 @@ public class Search {
                 
                 //RConsole.println("avgerage for s: "+start+" e: "+end+" ");
                 for(int i=start;i<=end;i++){
-//                        RConsole.print(""+input.get(i));
+                        //RConsole.print(""+input.get(i));
                         output+=input.get(i);
                         count++;
                 }
@@ -534,7 +519,7 @@ public class Search {
                 
                 for(int i=0;i<bottomData.size();i++){
                         //if within angle error and close enough then add data
-                        if(Math.abs(headings.get(i)-cardinal)<POINT_BLOCKED_ERROR||Math.abs(headings.get(i)-cardinal)>(360-POINT_BLOCKED_ERROR)){
+                        if(Math.abs(headings.get(i)-cardinal)<POINT_BLOCKED_ERROR){
                         	cardinalTop.add(topData.get(i));
                         	cardinalBottom.add(bottomData.get(i));
                         }
@@ -563,7 +548,8 @@ public class Search {
             robo.setForwardSpeed(100);
             
             //move back
-            nav.travelSetDistanceBackwards(DEFAULT_GRAB_DISTANCE);         
+            nav.travelSetDistanceBackwards(DEFAULT_GRAB_DISTANCE);
+                    
             
             //lower claw
             robo.dropBlock();
@@ -587,21 +573,17 @@ public class Search {
             robo.stopClaw();
             
             //move back
-            //nav.travelSetDistanceBackwards(SAFE_PUSH);
+            nav.travelSetDistanceBackwards(SAFE_PUSH);
             
             //------safe grab-------
             
-            double temp_bot=robo.scanWithBottomsensor(5);
-            double temp_top=robo.scanWithTopsensor(5);
-            if(temp_bot<(RECUR_SCAN_DIST)&&(temp_top-temp_bot)>DIFFERENTIATE_DIFF&&recursion_count<=CLAW_RECUR_LIM)
+
+            double temp=robo.scanWithBottomsensor(5);
+            if(temp<(DEFAULT_GRAB_DISTANCE+BLOCK_LEEWAY)&&recursion_count<=CLAW_RECUR_LIM)
             {
-                    RConsole.println("RECURSION GRAB -> dist: "+temp_bot);
+                    RConsole.println("RECUSRION GRAB "+temp);
                     GrabBlock();
-            }
-            if(temp_bot<(RECUR_SCAN_DIST)&&(temp_top-temp_bot)<DIFFERENTIATE_DIFF)
-            {
-            	recursion_count=CLAW_RECUR_LIM+1;
-            }
+            }            
             
             //robo.rotateClawAbsolute(CLAW_LOWER_ANGLE);
     }
