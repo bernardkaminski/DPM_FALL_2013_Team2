@@ -1,7 +1,7 @@
 package IntermediateLogic;
 /**
- * This class is what is used to differentiate between an obstacle and a building block. 
- * @author Deepak
+ * This class is used to differentiate between an obstacle and a building block. 
+ * @author Deepak, Miguel
  * @version 1.0
  * @see TwoWheeledRobot
  */

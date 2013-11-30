@@ -24,19 +24,19 @@ public class Navigation {
        
         //Constants
             
-        private final int SLOW=75;
+        private final int SLOW=100;
         private final int HARD_TRAVEL=30;
         private final int DETECT_DISTANCE=25;
-        private final int STANDARD=200;
+        private final int STANDARD=350;
         private final int FAST=300;
         public final double NORTH=0;
         public final double SOUTH=180;
         public final double WEST=270;
         public final double EAST=90;        
-        private final double GRIDLINE_ANGLE_THRESHOLD=35;
-        private final double TRAVELTO_GOAL_THRESHOLD=5;
+        private final double GRIDLINE_ANGLE_THRESHOLD=20;//35
+        private final double TRAVELTO_GOAL_THRESHOLD=3;
         private final double TURNTO_THRESHOLD=2.0;
-        private final double TRAVELTO_TURN_THRESHOLD=4;//WAS 4
+        private final double TRAVELTO_TURN_THRESHOLD=4.5;//WAS 4
         private final int LINE_LIGHTVALUE_MAX=515;
         private final int LINE_LIGHTVALUE_MIN=400;  
         private final int SLOW_TURNTHRESHOLD=8;
@@ -218,8 +218,7 @@ public class Navigation {
         {
         	turnTo(90, true);
         }
-        
-        robo.setForwardSpeed((int)(SLOW*1.5));
+        robo.setForwardSpeed((int)(SLOW*2));
         robo.stopMotors();    
         leftLightValue=robo.getLeftLightValue();
         rightLightValue=robo.getRightLightValue();      
@@ -405,7 +404,6 @@ public class Navigation {
             int LINE_LIGHTVALUE_MIN=400;
             int SLOW =75; 
             robo.setForwardSpeed((int)(SLOW*1.5));
-            robo.stopMotors();    
             int leftLightValue=robo.getLeftLightValue();
             int rightLightValue=robo.getRightLightValue();      
             turnTo(45, true);
@@ -424,24 +422,27 @@ public class Navigation {
              }
             
              robo.stopRightMotor();
-             //robo.rotateClawAbsolute(search.CLAW_LOWER_ANGLE);
-             robo.rotateClawAbsoluteWhileBackingUp(robo.CLAW_LOWER_ANGLE);
+             robo.dropBlock();
+             //robo.rotateClawAbsoluteWhileBackingUp(robo.CLAW_LOWER_ANGLE);
              travelSetDistanceBackwards(18);
+             robo.raiseClaw();
              turnTo(0, true);
-             fineTune();
+             //fineTune();
+             
         }
 
-        public void drop()
+        public void stackSecond()
         {
         	superTune();
-            int LINE_LIGHTVALUE_MAX=515;
+        	turnTo(45, true);
+        	travelSetDistanceStraight(4);
+        	int LINE_LIGHTVALUE_MAX=515;
             int LINE_LIGHTVALUE_MIN=400;
             int SLOW =75; 
-            robo.setForwardSpeed((int)(SLOW*1.5));
-            robo.stopMotors();    
+            robo.setForwardSpeed((int)(SLOW*1.5));    
             int leftLightValue=robo.getLeftLightValue();
             int rightLightValue=robo.getRightLightValue();      
-            turnTo(45, true);
+            
             while(!(leftLightValue<LINE_LIGHTVALUE_MAX && leftLightValue > LINE_LIGHTVALUE_MIN))
             {               
                  robo.startLeftMotor();   
@@ -449,6 +450,7 @@ public class Navigation {
             }
                     
         	 robo.stopLeftMotor();
+        	 robo.startRightMotor();
         	 
         	 while(!(rightLightValue<LINE_LIGHTVALUE_MAX && rightLightValue > LINE_LIGHTVALUE_MIN))
         	 {               
@@ -457,9 +459,12 @@ public class Navigation {
         	 }
         	
         	 robo.stopRightMotor();
+        	 travelSetDistanceBackwards(5);
         	 robo.dropBlock();
+        	 travelSetDistanceBackwards(5);
+             travelSetDistanceStraight(5);
         	 travelSetDistanceBackwards(18);
-        	 robo.pickUpBlock();
+        	 robo.raiseClaw();
         	 turnTo(0, true);
         	 fineTune();
         }
@@ -467,7 +472,7 @@ public class Navigation {
         public void superTune()
         {
         	turnTo(90, true);
-    		travelSetDistanceBackwards(5);
+        	travelSetDistanceBackwards(5);
     		fineTune();
     		turnTo(0, true);
     		travelSetDistanceBackwards(5);

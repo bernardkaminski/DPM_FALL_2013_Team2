@@ -1,8 +1,11 @@
 package MainLogic;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
+=======
+>>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
 
 import java.util.Random;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import IntermediateLogic.Navigation;
 
 public class Path 
 { 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	/**
@@ -176,6 +180,8 @@ public class Path
                         	  yCords.add(yCords.get(i-1));                                
                            }
 =======
+=======
+>>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
 =======
 >>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
 	public static void generatePath(int xStart, int yStart, int xZone,int yZone,ArrayList<Integer>xCords, ArrayList<Integer>yCords)
@@ -874,6 +880,7 @@ public class Path
 			if(xCords.get(xCords.size()-1)>xCords.get(0)){
 				right=true;
 <<<<<<< HEAD
+<<<<<<< HEAD
 			}
 			else{right=false;}
 		}
@@ -885,6 +892,19 @@ public class Path
 			else{
 				right=false;
 			}
+=======
+			}
+			else{right=false;}
+		}
+		else{
+			up=false;
+			if(xCords.get(xCords.size()-1)<xCords.get(0)){
+				right=true;
+			}
+			else{
+				right=false;
+			}
+>>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
 =======
 			}
 			else{right=false;}
@@ -1136,6 +1156,9 @@ public class Path
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
+=======
 >>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
 =======
 >>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85

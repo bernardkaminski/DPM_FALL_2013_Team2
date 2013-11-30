@@ -1,11 +1,10 @@
-
 package Hardware;
 
 import lejos.nxt.NXTRegulatedMotor;
 
 /**
  * The class that has all the hardware necessary, it controls the three motors and the four sensors.
- * @author Bernie, Connor
+ * @author Bernie, Connor, Deepak
  * @version 1.0
  * @see UltrasonicPoller,LightPoller,UltrasonicScanner,NXTRegulatedMotor
  */
@@ -23,10 +22,11 @@ public class TwoWheeledRobot {
         private int forwardSpeed=250, rotationSpeed=90;
         
         //Claw constants
-        public final int CLAW_RAISE_ANGLE=85;
+        public final int CLAW_RAISE_ANGLE=95;
+        public final int CLAW_PICK_ANGLE=CLAW_RAISE_ANGLE-12;
         public final int CLAW_RAISE_SPEED=100;//250
         public final int CLAW_RAISE_ACC=100;//150
-        public final int CLAW_LOWER_ANGLE=-55;
+        public final int CLAW_LOWER_ANGLE=-60;//55
         public final int CLAW_LOWER_SPEED=50;
         public final int CLAW_LOWER_ACC=80;
         
@@ -103,7 +103,10 @@ public class TwoWheeledRobot {
             
             
         // accessors used for odometer
-        
+        /**
+         * this method return the displacement of the next regulated motors
+         * @return double degrees of change 
+         */
         public double getDisplacement() 
         {
                 return (leftMotor.getTachoCount() * leftRadius +
@@ -127,18 +130,45 @@ public class TwoWheeledRobot {
                 data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
         }
         
-        public void rotateClawAbsoluteWhileBackingUp(int degree)
+        public void dropBlockWhileBackingUp()
         {
-        	setForwardSpeed(50);
-        	while(clawMotor.getPosition()>degree)
-        	{
-        		clawMotor.backward();
-        		goBackward();
-        	}
-        	stopClaw();
-        	stopMotors();
-        		//clawMotor.lock(100);
+                setForwardSpeed(50);
+                while(clawMotor.getPosition()>CLAW_LOWER_ANGLE)
+                {
+                        clawMotor.backward();
+                        goBackward();
+                }
+                stopClaw();
+                stopMotors();
+                        //clawMotor.lock(100);
         }
+        
+        public void dropBlockWhileBackingUp(int degree)
+        {
+                setForwardSpeed(50);
+                while(clawMotor.getPosition()>degree)
+                {
+                        clawMotor.backward();
+                        goBackward();
+                }
+                stopClaw();
+                stopMotors();
+                        //clawMotor.lock(100);
+        }
+        public void stackBlock()
+        {
+			dropBlock(CLAW_RAISE_ANGLE-10);
+			floatClaw();
+			try 
+			{
+				Thread.sleep(1000);
+			} catch (InterruptedException e) 
+			{
+				//do nothing
+			}
+			dropBlock();
+        }
+        
         public void stopClaw()
         {
                 clawMotor.stop();
@@ -149,46 +179,53 @@ public class TwoWheeledRobot {
         {
                 clawMotor.flt();
         }
+        public void raiseClaw()
+        {
+            setClawAcc(CLAW_RAISE_ACC);
+            setclawSpeed(CLAW_RAISE_SPEED);
+            clawMotor.rotateTo(CLAW_RAISE_ANGLE,false);
+        }
+        
         
         public void pickUpBlock()
         {
-            	setClawAcc(CLAW_RAISE_ACC);
-            	setclawSpeed(CLAW_RAISE_SPEED);
-                clawMotor.rotateTo(CLAW_RAISE_ANGLE,false);
+                setClawAcc(CLAW_RAISE_ACC);
+                setclawSpeed(CLAW_RAISE_SPEED);
+                clawMotor.rotateTo(CLAW_PICK_ANGLE,false);
         }
 
         public void pickUpBlock(int degree)
         {
-        	setClawAcc(CLAW_RAISE_ACC);
-        	setclawSpeed(CLAW_RAISE_SPEED);
+                setClawAcc(CLAW_RAISE_ACC);
+                setclawSpeed(CLAW_RAISE_SPEED);
                 clawMotor.rotateTo(degree,false);
         }
         
         public void pickUpBlock(int degree,int acc,int speed)
         {
-            	setClawAcc(acc);
-            	setclawSpeed(speed);
+                    setClawAcc(acc);
+                    setclawSpeed(speed);
                 clawMotor.rotateTo(degree,false);
         }
         
         public void dropBlock()
         {
-        	setClawAcc(CLAW_LOWER_ACC);
-        	setclawSpeed(CLAW_LOWER_SPEED);
+                setClawAcc(CLAW_LOWER_ACC);
+                setclawSpeed(CLAW_LOWER_SPEED);
             clawMotor.rotateTo(CLAW_LOWER_ANGLE,false);
         }
         
         public void dropBlock(int degree)
         {
-        	setClawAcc(CLAW_LOWER_ACC);
-        	setclawSpeed(CLAW_LOWER_SPEED);
+                setClawAcc(CLAW_LOWER_ACC);
+                setclawSpeed(CLAW_LOWER_SPEED);
             clawMotor.rotateTo(degree,false);
         }
         
         public void dropBlock(int degree,int acc,int speed)
         {
-        	setClawAcc(acc);
-        	setclawSpeed(speed);
+                setClawAcc(acc);
+                setclawSpeed(speed);
             clawMotor.rotateTo(degree,false);
         }
         
