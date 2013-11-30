@@ -1,17 +1,4 @@
 package MainLogic;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
-=======
->>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
-
-import java.util.Random;
-import java.util.ArrayList;
->>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
-
->>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
 import java.util.Random;
 import java.util.ArrayList;
 import IntermediateLogic.Navigation;
@@ -26,9 +13,6 @@ import IntermediateLogic.Navigation;
 
 public class Path 
 { 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 	/**
 	 * The generatPAth method is the main purpose of the path class, it generates a zig zag pattern to the from xStart,yStart to xZone, yZone
 	 * When it is no longer possible to zig zag, the path is filled in with a straight line
@@ -179,7 +163,6 @@ public class Path
                         	  xCords.add(xCords.get(i-1)-30);
                         	  yCords.add(yCords.get(i-1));                                
                            }
-
                           else
                           { 
                         	  //Add new set of coordinates to travel too, y value unchanged, increment the x by 30
@@ -203,7 +186,6 @@ public class Path
                             int j=i;
                             while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone))
                             {
-<<<<<<< HEAD
                             	//Fill in the array with the same x coordinate as the zone and y values that are increasing multiples of 30
                             	xCords.add(xZone);
                             	yCords.add(yCords.get(j-1)+30);        
@@ -278,52 +260,6 @@ public class Path
                                     xCords.add(xZone);
                                     yCords.add(yCords.get(j-1)-30);        
                                     j++;
-=======
-                                int j=1;
-                                xCords.add(-1);
-                                yCords.add(-1);
-                                while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone))
-                                { 
-                                        if(j==1)
-                                        {
-                                                xCords.remove(0);
-                                                yCords.remove(0);  
-                                                yCords.add(yStart);
-                                                xCords.add(xStart);
-                                        }
-                                        yCords.add(yZone);
-                                        if(right){
-                                        	xCords.add(xStart+(j*30)); 
-                                        }
-                                        else{
-                                        	xCords.add(xStart-(j*30)); 
-                                        }
-                                        j++;
-                                }
-                                break;
-                                    
-                            }
-                            
-                     }
-                    else
-                    	{                       
-                         yCords.add(yStart);
-                         xCords.add(xStart);
-            
-                    	}
-                            
-                    }
-                 //Not the first iteration, fill in zig zag to zone coordinates
-                    else
-                    {
-                        if((i%2)==0)
-                        {        
-                            if(up)
-                            {          	
-                            		xCords.add(xCords.get(i-1));
-                                    yCords.add(yCords.get(i-1)+30);
-                            	   
->>>>>>> a6a3c5fb4f1f3a16a15217ecf0ead7c7aa5f4c85
                             }
                             //Coordinate array complete
                             break;
@@ -353,7 +289,6 @@ public class Path
                             int j=i;
                             while((xCords.get(xCords.size()-1)!=xZone)||(yCords.get(yCords.size()-1)!=yZone))
                             {
-<<<<<<< HEAD
                             	xCords.add(xZone);
                                 yCords.add(yCords.get(j-1)-30);        
                                 j++;
